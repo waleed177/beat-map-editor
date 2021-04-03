@@ -151,4 +151,4 @@ func _on_CollapseSpaces_pressed():
 
 func _on_VScrollBar_scrolling():
 	_scrolling.rect_position.y = - _scene.tile_size.y * $VScrollBar.value
-	print(str($VScrollBar.value) + " " + str($VScrollBar.min_value) + " " + str($VScrollBar.max_value))
+
