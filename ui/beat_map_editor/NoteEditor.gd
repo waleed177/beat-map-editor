@@ -13,12 +13,14 @@ onready var _tile_size = _scene.tile_size
 var _beat_map_nodes = {}
 var _scroll_speed = 25
 var _current_y = 0
+var _max_y = 0
 
 var _key_numbers = range(KEY_0, KEY_9+1)
 var _collapse_spaces = false
 
 func _ready():
 	focus_mode = Control.FOCUS_CLICK
+	_set_max_y(1)
 
 func _unhandled_key_input(event):
 	if event.pressed and event.scancode in _scene.keyboard_note_shortcuts:
@@ -55,14 +57,17 @@ func _gui_input(event):
 				BUTTON_WHEEL_UP:
 					_scrolling.rect_position += Vector2.DOWN * _scroll_speed
 					_scrolling.rect_position.y = min(0, _scrolling.rect_position.y)
+					$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 				BUTTON_WHEEL_DOWN:
 					_scrolling.rect_position += Vector2.UP * _scroll_speed
+					$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 				BUTTON_MIDDLE:
 					if tile_x == 0:
 						_current_y = tile_y
 						_update_keyboard_selection_box()
 
 func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
+	assert(y != NAN)
 	if y < 0:
 		return
 	if modify:
@@ -72,6 +77,8 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 			_scene.beat_map.erase(y)
 		_beat_map_nodes[y].queue_free()
 		_beat_map_nodes.erase(y)
+		if y == _max_y:
+			_set_max_y(_beat_map_nodes.keys().max())
 	elif not y in _beat_map_nodes or _beat_map_nodes[y] == null:
 		if modify:
 			_scene.beat_map[y] = data
@@ -87,6 +94,9 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 		texture_button.rect_position = Vector2(_selection_box.rect_position.x, y*_tile_size.y)
 		
 		_beat_map_nodes[y] = texture_button
+		
+		if y >= _max_y:
+			_set_max_y(y)
 	else:
 		_beat_map_nodes[y].texture_normal = _scene.get_colored_note(_scene.tileset, data.name, y if actual_y == -1 else actual_y)
 		if modify:
@@ -108,6 +118,7 @@ func _update_keyboard_selection_box():
 		_scrolling.rect_position.x,
 		min(0, rect_size.y/2  - _keyboard_selection_box.rect_size.y/2-_keyboard_selection_box.rect_position.y)
 	)
+	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 
 func refresh():
 	for key in _beat_map_nodes:
@@ -116,6 +127,7 @@ func refresh():
 	var y = -1
 	var sorted_keys = _scene.beat_map.keys()
 	sorted_keys.sort()
+	_set_max_y(sorted_keys[len(sorted_keys) - 1])
 	for key in sorted_keys:
 		if _collapse_spaces:
 			y += 1
@@ -123,6 +135,20 @@ func refresh():
 			y = key
 		_set_tile(y, _scene.beat_map[key], false, key)
 
+func _set_max_y(val):
+	_max_y = val
+	var height = $VScrollBar.rect_size.y/(_scene.tile_size.y*_max_y) if _max_y != 0 else 1
+	height = clamp(height, 0, 0.9)
+	height *= $VScrollBar.rect_size.y
+	$VScrollBar.get_stylebox("grabber").border_width_top = height/2.0
+	$VScrollBar.get_stylebox("grabber").border_width_bottom = height/2.0
+	$VScrollBar.max_value = _max_y
+
 func _on_CollapseSpaces_pressed():
 	_collapse_spaces = not _collapse_spaces
 	refresh()
+
+
+func _on_VScrollBar_scrolling():
+	_scrolling.rect_position.y = - _scene.tile_size.y * $VScrollBar.value
+	print(str($VScrollBar.value) + " " + str($VScrollBar.min_value) + " " + str($VScrollBar.max_value))

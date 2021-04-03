@@ -1,8 +1,17 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/NoteSelector.gd" type="Script" id=1]
 [ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/NoteEditor.gd" type="Script" id=2]
 [ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/beat_map_editor.gd" type="Script" id=3]
+
+[sub_resource type="StyleBoxFlat" id=1]
+resource_local_to_scene = true
+border_width_top = 288
+border_width_bottom = 288
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="MarginContainer" type="MarginContainer"]
 anchor_right = 1.0
@@ -114,6 +123,21 @@ rect_clip_content = true
 focus_mode = 1
 size_flags_horizontal = 3
 script = ExtResource( 2 )
+
+[node name="VScrollBar" type="VScrollBar" parent="VBoxContainer/HBoxContainer/NoteEditor"]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -12.0
+custom_styles/grabber_highlight = SubResource( 1 )
+custom_styles/grabber = SubResource( 1 )
+custom_styles/grabber_pressed = SubResource( 1 )
+max_value = 4.0
+step = 1.0
+custom_step = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Scrolling" type="Control" parent="VBoxContainer/HBoxContainer/NoteEditor"]
 anchor_left = 0.5
@@ -260,6 +284,7 @@ text = "New Beatmap"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+[connection signal="scrolling" from="VBoxContainer/HBoxContainer/NoteEditor/VScrollBar" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_VScrollBar_scrolling"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveShortcuts" to="." method="_on_SaveShortcuts_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveBeatmap" to="." method="_on_SaveBeatmap_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveBeatmapAs" to="." method="_on_SaveBeatmapAs_pressed"]
