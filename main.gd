@@ -2,12 +2,15 @@ tool
 extends EditorPlugin
 
 
-const MainPanel = preload("res://addons/beat_map_editor/ui/beat_map_editor/beat_map_editor.tscn")
+const MainPanel = preload("./ui/beat_map_editor/beat_map_editor.tscn")
 
 var main_panel_instance
+var undo_redo
 
 func _enter_tree():
 	main_panel_instance = MainPanel.instance()
+	main_panel_instance.plugin = self
+	undo_redo = get_undo_redo()
 	get_editor_interface().get_editor_viewport().add_child(main_panel_instance)
 	make_visible(false)
 

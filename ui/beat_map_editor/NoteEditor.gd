@@ -7,6 +7,7 @@ onready var _selection_box = $Scrolling/SelectionBox
 onready var _keyboard_selection_box = $Scrolling/KeyboardSelectionBox
 onready var _scrolling = $Scrolling
 
+signal tiles_modified
 
 onready var _tile_size = _scene.tile_size
 var _beat_map_nodes = {}
@@ -21,7 +22,7 @@ func _ready():
 
 func _unhandled_key_input(event):
 	if event.pressed and event.scancode in _scene.keyboard_note_shortcuts:
-		_set_tile(_current_y, {
+		_undoable_set_tile(_current_y, {
 			name= _scene.keyboard_note_shortcuts[event.scancode]
 		})
 		_current_y += 1
@@ -45,12 +46,12 @@ func _gui_input(event):
 			match event.button_index:
 				BUTTON_LEFT:
 					if tile_x == 0:
-						_set_tile(tile_y, { 
+						_undoable_set_tile(tile_y, { 
 							name = _note_selector.selected_note
 						})
 				BUTTON_RIGHT:
 					if tile_x == 0:
-						_set_tile(tile_y, null)
+						_undoable_set_tile(tile_y, {})
 				BUTTON_WHEEL_UP:
 					_scrolling.rect_position += Vector2.DOWN * _scroll_speed
 					_scrolling.rect_position.y = min(0, _scrolling.rect_position.y)
@@ -64,7 +65,9 @@ func _gui_input(event):
 func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 	if y < 0:
 		return
-	if data == null:
+	if modify:
+		emit_signal("tiles_modified")
+	if data == null or data.empty():
 		if modify:
 			_scene.beat_map.erase(y)
 		_beat_map_nodes[y].queue_free()
@@ -88,6 +91,16 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 		_beat_map_nodes[y].texture_normal = _scene.get_colored_note(_scene.tileset, data.name, y if actual_y == -1 else actual_y)
 		if modify:
 			_scene.beat_map[y] = data
+
+func _get_tile(y: int):
+	return _scene.beat_map[y] if y in _scene.beat_map else {}
+
+func _undoable_set_tile(y: int, data):
+	var undo_redo: UndoRedo = _scene.plugin.undo_redo
+	undo_redo.create_action("Set Tile")
+	undo_redo.add_do_method(self, "_set_tile", y, data)
+	undo_redo.add_undo_method(self, "_set_tile", y, _get_tile(y))
+	undo_redo.commit_action()
 
 func _update_keyboard_selection_box():
 	_keyboard_selection_box.rect_position = Vector2(_keyboard_selection_box.rect_position.x, _current_y*_tile_size.y)
