@@ -56,15 +56,19 @@ func _gui_input(event):
 						_undoable_set_tile(tile_y, {})
 				BUTTON_WHEEL_UP:
 					_scrolling.rect_position += Vector2.DOWN * _scroll_speed
-					_scrolling.rect_position.y = min(0, _scrolling.rect_position.y)
-					$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
+					_refresh_scroll_bar()
 				BUTTON_WHEEL_DOWN:
 					_scrolling.rect_position += Vector2.UP * _scroll_speed
-					$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
+					_refresh_scroll_bar()
 				BUTTON_MIDDLE:
 					if tile_x == 0:
 						_current_y = tile_y
 						_update_keyboard_selection_box()
+
+func _refresh_scroll_bar():
+	_scrolling.rect_position.y = min(0, _scrolling.rect_position.y)
+	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
+
 
 func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 	assert(y != NAN)
@@ -112,13 +116,18 @@ func _undoable_set_tile(y: int, data):
 	undo_redo.add_undo_method(self, "_set_tile", y, _get_tile(y))
 	undo_redo.commit_action()
 
-func _update_keyboard_selection_box():
-	_keyboard_selection_box.rect_position = Vector2(_keyboard_selection_box.rect_position.x, _current_y*_tile_size.y)
+func _set_scroll_y(y):
+	_keyboard_selection_box.rect_position = Vector2(_keyboard_selection_box.rect_position.x, y)
 	_scrolling.rect_position = Vector2(
 		_scrolling.rect_position.x,
-		min(0, rect_size.y/2  - _keyboard_selection_box.rect_size.y/2-_keyboard_selection_box.rect_position.y)
+		min(0, rect_size.y/2  - _keyboard_selection_box.rect_size.y/2 - y)
 	)
+	_refresh_scroll_bar()
+
+func _update_keyboard_selection_box():
+	_set_scroll_y(_current_y*_tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
+	_refresh_scroll_bar()
 
 func refresh():
 	for key in _beat_map_nodes:
@@ -158,6 +167,7 @@ var song_bps
 var song_speed
 var song_playing = false
 var song_time = 0
+var song_scroll_y = 0
 
 func get_current_time():
 	return _scrolling.rect_position.y/(-song_bps*((_scene.tile_size.y/2.0)*song_speed))
@@ -175,7 +185,17 @@ func _process(delta):
 	if song_playing:
 		notes_step(delta)
 
+onready var _keyboard_selection_box_color = _keyboard_selection_box.color
+
 func notes_step(delta):
 	song_time += delta
-	_scrolling.rect_position.y = -song_bps*song_time*((_scene.tile_size.y/2.0)*song_speed)
+	song_scroll_y = song_bps*song_time*((_scene.tile_size.y/2.0)*song_speed)
+	_set_scroll_y(song_scroll_y)
+	var new_y = floor(song_scroll_y/_scene.tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
+	if _current_y != new_y:
+		_current_y = new_y
+		_update_keyboard_selection_box()
+		_keyboard_selection_box.color = Color.lightgreen
+		yield(get_tree().create_timer(0.1), "timeout")
+		_keyboard_selection_box.color = _keyboard_selection_box_color
