@@ -10,6 +10,7 @@ var beat_map = {}
 var plugin
 
 onready var file_dialog = $FileDialog
+onready var file_dialog_select_songs = $SelectSongsFile
 onready var confirmation_dialog = $ConfirmationDialog
 var _confirmation_dialog_confirmed = false
 
@@ -26,18 +27,21 @@ export(NodePath) var open_file_label_path
 onready var open_file_label: Label = get_node(open_file_label_path)
 
 # 1 (4), 1/2 (8), 1/4 (16), 1/16 (64)
-var note_type_order = [0, 3, 2, 3, 1, 3, 2, 3, 0] #for display
-var note_type_order_save = [4, 64, 16, 64, 8, 64, 16, 64, 4] #for save
+var note_type_order = [0, 3, 2, 3, 1, 3, 2, 3] #for display
+var note_type_order_save = [4, 64, 16, 64, 8, 64, 16, 64] #for save
 var currently_open_file = ""
 var modified = false
 
-const SHORTCUTS_PATH = "../../shortcuts.json"
+var EDITOR_SETTINGS_PATH
 
-func _init():
-	load_shortcuts(SHORTCUTS_PATH)
+var song_file_path
+var songs
 
 func _ready():
+	EDITOR_SETTINGS_PATH = filename.get_base_dir() + "/../../editor_settings.json"
+	load_editor_settings(EDITOR_SETTINGS_PATH)
 	file_dialog.connect("file_selected", self, "_on_file_selected")
+	file_dialog_select_songs.connect("file_selected", self, "_on_songs_file_selected")
 	note_editor.connect("tiles_modified", self, "_on_tiles_modified")
 	plugin.connect("resource_saved", self, "_on_resource_saved")
 	confirmation_dialog.connect("confirmed", self, "_on_confirmation_dialog_confirmed")
@@ -71,26 +75,36 @@ func display_note_id_in_note_selector(tileset: TileSet, id: int):
 	var name = tileset.tile_get_name(id)
 	return name[0] == "0" and int(name.substr(1)) < 16
 
-func load_shortcuts(file_path):
+func load_editor_settings(file_path):
 	var file = File.new()
 	if not file.file_exists(file_path):
-		save_tileset_shortcuts(file_path)
+		save_editor_settings(file_path)
 	file.open(file_path,File.READ)
 	var dict = JSON.parse(file.get_as_text()).result
+	file.close()
+	var dict_keyboard_note_shortcuts = dict["keyboard_note_shortcuts"]
 	keyboard_note_shortcuts = {}
 	keyboard_note_shortcuts_inv = {}
-	for key in dict:
-		keyboard_note_shortcuts_inv[dict[key]] = int(key)
-		keyboard_note_shortcuts[int(key)] = dict[key]
+	for key in dict_keyboard_note_shortcuts:
+		keyboard_note_shortcuts_inv[dict_keyboard_note_shortcuts[key]] = int(key)
+		keyboard_note_shortcuts[int(key)] = dict_keyboard_note_shortcuts[key]
+	song_file_path = dict["song_file_path"]
+	if song_file_path and file.file_exists(song_file_path):
+		file.open(song_file_path,File.READ)
+		songs = JSON.parse(file.get_as_text()).result
+		file.close()
 
-func save_tileset_shortcuts(file_path: String):
+func save_editor_settings(file_path: String):
 	var file = File.new()
 	file.open(file_path,File.WRITE)
-	file.store_string(JSON.print(keyboard_note_shortcuts))
+	file.store_string(JSON.print({
+		keyboard_note_shortcuts = keyboard_note_shortcuts,
+		song_file_path = song_file_path
+	}))
 	file.close()
 
-func _on_SaveShortcuts_pressed():
-	save_tileset_shortcuts(SHORTCUTS_PATH)
+func _on_SaveSettings_pressed():
+	save_editor_settings(EDITOR_SETTINGS_PATH)
 
 func save_beat_map():
 	var file = File.new()
@@ -127,37 +141,9 @@ func _on_OpenBeatmap_pressed():
 		open = _confirmation_dialog_confirmed
 	if open:
 		file_dialog.mode=FileDialog.MODE_OPEN_FILE
+		file_dialog.window_title = "Open beatmap"
 		file_dialog.set_filters(PoolStringArray(["*.json"]))
 		file_dialog.popup_centered(Vector2(400, 400))
-		
-
-func _on_file_selected(path):
-	match file_dialog.mode:
-		FileDialog.MODE_SAVE_FILE:
-			currently_open_file = path
-			save_beat_map()
-		FileDialog.MODE_OPEN_FILE:
-			var file = File.new()
-			file.open(path,File.READ)
-			modified = false
-			var beat_map_array = JSON.parse(file.get_as_text()).result
-			BMP_txt.text = str(beat_map_array[0])
-			speed_multiplier_txt.text = str(beat_map_array[1])
-			song_index_txt.text = str(beat_map_array[2])
-			beat_map.clear()
-			for i in range(3, len(beat_map_array)):
-				var arr = beat_map_array[i]
-				var y = arr[1]
-				var name = arr[2]
-				beat_map[y] = {
-					name=name
-				}
-			note_editor.refresh()
-			currently_open_file = path
-			refresh_open_file_label()
-			note_editor._current_y = 0
-			note_editor._update_keyboard_selection_box()
-			note_editor.refresh()
 
 func refresh_open_file_label():
 	open_file_label.text = currently_open_file + ("*" if modified else "")
@@ -168,6 +154,7 @@ func _on_SaveBeatmapAs_pressed():
 
 func show_save_beatmap_dialog():
 	file_dialog.mode=FileDialog.MODE_SAVE_FILE
+	file_dialog.window_title = "Save beatmap"	
 	file_dialog.set_filters(PoolStringArray(["*.json"]))
 	file_dialog.popup_centered(Vector2(400, 400))
 
@@ -211,3 +198,79 @@ func open_confirmation_dialog():
 func _on_confirmation_dialog_confirmed():
 	_confirmation_dialog_confirmed = true
 	confirmation_dialog.hide()
+
+func _on_PlaySongFromStart_pressed():
+	var player = $AudioStreamPlayer
+	if player.playing:
+		player.stop()
+		note_editor.stop_playing()
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
+	else:
+		player.stream = load(songs[int(song_index_txt.text)])
+		player.volume_db = -20
+		player.play()
+		note_editor.play_notes(int(BMP_txt.text), int(BMP_txt.text)/60.0 * int(speed_multiplier_txt.text))
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
+
+func _on_PlaySongFromHere_pressed():
+	var player = $AudioStreamPlayer
+	if player.playing:
+		player.stop()
+		note_editor.stop_playing()
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
+	else:
+		player.stream = load(songs[int(song_index_txt.text)])
+		player.volume_db = -20
+		player.play()
+		player.seek(note_editor.get_current_time())
+		note_editor.play_notes(int(BMP_txt.text), int(BMP_txt.text)/60.0 * int(speed_multiplier_txt.text), note_editor.get_current_time())
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
+		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
+
+func _on_SelectSongsFolder_pressed():
+	file_dialog_select_songs.mode=FileDialog.MODE_OPEN_FILE
+	file_dialog_select_songs.popup_centered(Vector2(400, 400))
+
+func _on_songs_file_selected(path):
+	song_file_path = path
+	var file = File.new()
+	if song_file_path and file.file_exists(song_file_path):
+		file.open(song_file_path,File.READ)
+		songs = JSON.parse(file.get_as_text()).result
+		file.close()
+	
+
+#Too lazy to make more than one dialogue c:
+func _on_file_selected(path):
+	match file_dialog.mode:
+		FileDialog.MODE_SAVE_FILE:
+			currently_open_file = path
+			save_beat_map()
+		FileDialog.MODE_OPEN_FILE:
+			var file = File.new()
+			file.open(path,File.READ)
+			modified = false
+			var beat_map_array = JSON.parse(file.get_as_text()).result
+			BMP_txt.text = str(beat_map_array[0])
+			speed_multiplier_txt.text = str(beat_map_array[1])
+			song_index_txt.text = str(beat_map_array[2])
+			beat_map.clear()
+			for i in range(3, len(beat_map_array)):
+				var arr = beat_map_array[i]
+				var y = arr[1]
+				var name = arr[2]
+				beat_map[y] = {
+					name=name
+				}
+			note_editor.refresh()
+			currently_open_file = path
+			refresh_open_file_label()
+			note_editor._current_y = 0
+			note_editor._update_keyboard_selection_box()
+			note_editor.refresh()
+
+
+
