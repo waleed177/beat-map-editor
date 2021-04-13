@@ -17,10 +17,49 @@ var _max_y = 0
 
 var _key_numbers = range(KEY_0, KEY_9+1)
 var _collapse_spaces = false
+var mode = "none"
+var _selection_currently_selecting = false
+var _selection_first_position: int
+var _selection_second_position: int
+var _selection_stabilize_selection = false
+
+var _clipboard = {
+	data = {},
+	from = 0,
+	to = 0
+}
 
 func _ready():
 	focus_mode = Control.FOCUS_CLICK
+	_note_selector.connect("note_selection_changed", self, "_on_note_selection_changed")
 	_set_max_y(1)
+
+func _on_note_selection_changed(note):
+	mode = "place"
+	_selection_stabilize_selection = false
+	_selection_currently_selecting = false
+	_selection_box.rect_size.y = _tile_size.y
+
+func _on_NoTool_pressed():
+	mode = "none"
+	_selection_stabilize_selection = false
+	_selection_currently_selecting = false
+	_selection_box.rect_size.y = _tile_size.y
+
+func _on_SelectTool_pressed():
+	mode = "select"
+
+func _on_CopyButton_pressed():
+	_clipboard["data"] = {}
+	_clipboard["from"] = _selection_first_position
+	_clipboard["to"] = _selection_second_position
+	for i in _better_range(_selection_first_position, _selection_second_position, 100):
+		_clipboard["data"][i] = _get_tile(i)
+
+func _on_PasteButton_pressed():
+	mode = "paste"
+	_selection_stabilize_selection = false
+
 
 func _unhandled_key_input(event):
 	if event.pressed and event.scancode in _scene.keyboard_note_shortcuts:
@@ -39,18 +78,46 @@ func _gui_input(event):
 		return false
 	if event is InputEventMouseMotion:
 		var pos = event.position - _scrolling.rect_position
-		_selection_box.rect_position = Vector2(_selection_box.rect_position.x, floor(pos.y/_tile_size.y)*_tile_size.y)
+		var tile_y = floor(pos.y/_tile_size.y)
+		if mode == "paste":
+			_selection_first_position = tile_y
+			_selection_second_position = _selection_first_position + abs(_clipboard["to"]-_clipboard["from"])
+		if _selection_currently_selecting:
+			if not _selection_stabilize_selection:
+				if mode != "paste":
+					_selection_second_position = floor(pos.y/_tile_size.y)
+				var delta = _selection_second_position-_selection_first_position
+				if delta >= 0:
+					_selection_box.rect_size.y = (delta+1)*_tile_size.y
+					_selection_box.rect_position = Vector2(_selection_box.rect_position.x, _selection_first_position*_tile_size.y)
+				else:
+					_selection_box.rect_size.y = (-delta+1)*_tile_size.y
+					_selection_box.rect_position = Vector2(_selection_box.rect_position.x, _selection_second_position*_tile_size.y)
+		else:
+			_selection_box.rect_position = Vector2(_selection_box.rect_position.x, floor(pos.y/_tile_size.y)*_tile_size.y)
 	if event is InputEventMouseButton:
+		var pos = event.position - _scrolling.rect_position
+		var tile_x = floor((pos.x+_tile_size.x/2)/_tile_size.x)
+		var tile_y = floor(pos.y/_tile_size.y)
 		if event.pressed:
-			var pos = event.position - _scrolling.rect_position
-			var tile_x = floor((pos.x+_tile_size.x/2)/_tile_size.x)
-			var tile_y = floor(pos.y/_tile_size.y)
 			match event.button_index:
 				BUTTON_LEFT:
-					if tile_x == 0:
-						_undoable_set_tile(tile_y, { 
-							name = _note_selector.selected_note
-						})
+					match mode:
+						"place":
+							if tile_x == 0:
+								_undoable_set_tile(tile_y, { 
+									name = _note_selector.selected_note
+								})
+						"select":
+							_selection_currently_selecting = true
+							_selection_stabilize_selection = false
+							_selection_first_position = tile_y
+						"paste":
+							var undo_redo: UndoRedo = _scene.plugin.undo_redo
+							undo_redo.create_action("Paste")
+							for i in _better_range(_clipboard["from"], _clipboard["to"], 100):
+								_undoable_set_tile(tile_y+i-min(_clipboard["from"], _clipboard["to"]), _clipboard["data"][i] if i in _clipboard["data"] else {}, false)
+							undo_redo.commit_action()
 				BUTTON_RIGHT:
 					if tile_x == 0:
 						_undoable_set_tile(tile_y, {})
@@ -64,6 +131,13 @@ func _gui_input(event):
 					if tile_x == 0:
 						_current_y = tile_y
 						_update_keyboard_selection_box()
+		else:
+			match event.button_index:
+				BUTTON_LEFT:
+					match mode:
+						"select":
+							_selection_currently_selecting = true
+							_selection_stabilize_selection = true
 
 func _refresh_scroll_bar():
 	_scrolling.rect_position.y = min(0, _scrolling.rect_position.y)
@@ -77,12 +151,13 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 	if modify:
 		emit_signal("tiles_modified")
 	if data == null or data.empty():
-		if modify:
-			_scene.beat_map.erase(y)
-		_beat_map_nodes[y].queue_free()
-		_beat_map_nodes.erase(y)
-		if y == _max_y:
-			_set_max_y(_beat_map_nodes.keys().max())
+		if y <= _max_y:
+			if modify:
+				_scene.beat_map.erase(y)
+			_beat_map_nodes[y].queue_free()
+			_beat_map_nodes.erase(y)
+			if y == _max_y:
+				_set_max_y(_beat_map_nodes.keys().max())
 	elif not y in _beat_map_nodes or _beat_map_nodes[y] == null:
 		if modify:
 			_scene.beat_map[y] = data
@@ -109,12 +184,14 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 func _get_tile(y: int):
 	return _scene.beat_map[y] if y in _scene.beat_map else {}
 
-func _undoable_set_tile(y: int, data):
+func _undoable_set_tile(y: int, data, commit_action = true):
 	var undo_redo: UndoRedo = _scene.plugin.undo_redo
-	undo_redo.create_action("Set Tile")
+	if commit_action:
+		undo_redo.create_action("Set Tile")
 	undo_redo.add_do_method(self, "_set_tile", y, data)
 	undo_redo.add_undo_method(self, "_set_tile", y, _get_tile(y))
-	undo_redo.commit_action()
+	if commit_action:
+		undo_redo.commit_action()
 
 func _set_scroll_y(y):
 	_keyboard_selection_box.rect_position = Vector2(_keyboard_selection_box.rect_position.x, y)
@@ -199,3 +276,12 @@ func notes_step(delta):
 		_keyboard_selection_box.color = Color.lightgreen
 		yield(get_tree().create_timer(0.1), "timeout")
 		_keyboard_selection_box.color = _keyboard_selection_box_color
+
+
+func _better_range(from: int, to: int, max_range: int):
+	if from == to:
+		return [from]
+	var dir = sign(to - from)
+	if abs(from-to) > max_range:
+		to = from + max_range*dir
+	return range(from, to+dir, dir)
