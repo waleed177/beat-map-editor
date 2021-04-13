@@ -329,6 +329,35 @@ margin_top = 350.0
 margin_right = 144.0
 margin_bottom = 370.0
 text = "Play Song From Here"
+
+[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 374.0
+margin_right = 144.0
+margin_bottom = 374.0
+
+[node name="NoTool" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 378.0
+margin_right = 144.0
+margin_bottom = 398.0
+text = "No Tool"
+
+[node name="SelectTool" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 402.0
+margin_right = 144.0
+margin_bottom = 422.0
+text = "Select"
+
+[node name="CopyButton" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 426.0
+margin_right = 144.0
+margin_bottom = 446.0
+text = "Copy"
+
+[node name="PasteButton" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 450.0
+margin_right = 144.0
+margin_bottom = 470.0
+text = "Paste"
 [connection signal="scrolling" from="VBoxContainer/HBoxContainer/NoteEditor/VScrollBar" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_VScrollBar_scrolling"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveSettings" to="." method="_on_SaveSettings_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveBeatmap" to="." method="_on_SaveBeatmap_pressed"]
@@ -340,3 +369,7 @@ text = "Play Song From Here"
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SelectSongsFolder" to="." method="_on_SelectSongsFolder_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart" to="." method="_on_PlaySongFromStart_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere" to="." method="_on_PlaySongFromHere_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/NoTool" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_NoTool_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SelectTool" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_SelectTool_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/CopyButton" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_CopyButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PasteButton" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_PasteButton_pressed"]

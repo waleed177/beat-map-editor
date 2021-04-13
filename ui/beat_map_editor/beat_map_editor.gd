@@ -276,5 +276,3 @@ func _on_file_selected(path):
 			note_editor._update_keyboard_selection_box()
 			note_editor.refresh()
 
-
-
