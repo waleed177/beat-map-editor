@@ -152,3 +152,30 @@ func _on_CollapseSpaces_pressed():
 func _on_VScrollBar_scrolling():
 	_scrolling.rect_position.y = - _scene.tile_size.y * $VScrollBar.value
 
+########################################
+var song_time_delay = AudioServer.get_time_to_next_mix() + AudioServer.get_output_latency()
+var song_bps
+var song_speed
+var song_playing = false
+var song_time = 0
+
+func get_current_time():
+	return _scrolling.rect_position.y/(-song_bps*((_scene.tile_size.y/2.0)*song_speed))
+
+func play_notes(bmp, speed, time=0):
+	song_bps = bmp/60
+	song_speed = speed
+	song_time = time
+	song_playing = true
+
+func stop_playing():
+	song_playing = false
+
+func _process(delta):
+	if song_playing:
+		notes_step(delta)
+
+func notes_step(delta):
+	song_time += delta
+	_scrolling.rect_position.y = -song_bps*song_time*((_scene.tile_size.y/2.0)*song_speed)
+	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y

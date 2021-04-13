@@ -12,7 +12,7 @@ var _mode = "normal"
 var _selection = null
 
 func _ready():
-	refresh()
+	call_deferred("refresh")
 
 func refresh():
 	var tile_ids = _scene.tileset.get_tiles_ids()
