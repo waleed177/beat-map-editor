@@ -36,6 +36,7 @@ var EDITOR_SETTINGS_PATH
 
 var song_file_path
 var songs
+var songs_directory
 
 func _ready():
 	EDITOR_SETTINGS_PATH = filename.get_base_dir() + "/../../editor_settings.json"
@@ -89,6 +90,7 @@ func load_editor_settings(file_path):
 		keyboard_note_shortcuts_inv[dict_keyboard_note_shortcuts[key]] = int(key)
 		keyboard_note_shortcuts[int(key)] = dict_keyboard_note_shortcuts[key]
 	song_file_path = dict["song_file_path"]
+	songs_directory = dict["songs_directory"]
 	if song_file_path and file.file_exists(song_file_path):
 		file.open(song_file_path,File.READ)
 		songs = JSON.parse(file.get_as_text()).result
@@ -99,7 +101,8 @@ func save_editor_settings(file_path: String):
 	file.open(file_path,File.WRITE)
 	file.store_string(JSON.print({
 		keyboard_note_shortcuts = keyboard_note_shortcuts,
-		song_file_path = song_file_path
+		song_file_path = song_file_path,
+		songs_directory = songs_directory
 	}))
 	file.close()
 
@@ -207,7 +210,7 @@ func _on_PlaySongFromStart_pressed():
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
 	else:
-		player.stream = load(songs[int(song_index_txt.text)])
+		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
 		note_editor.play_notes(int(BMP_txt.text), int(BMP_txt.text)/60.0 * int(speed_multiplier_txt.text))
@@ -222,7 +225,7 @@ func _on_PlaySongFromHere_pressed():
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
 	else:
-		player.stream = load(songs[int(song_index_txt.text)])
+		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
 		player.seek(note_editor.get_current_time())
@@ -236,6 +239,7 @@ func _on_SelectSongsFolder_pressed():
 
 func _on_songs_file_selected(path):
 	song_file_path = path
+	songs_directory = path.get_base_dir()
 	var file = File.new()
 	if song_file_path and file.file_exists(song_file_path):
 		file.open(song_file_path,File.READ)
