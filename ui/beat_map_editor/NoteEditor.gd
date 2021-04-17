@@ -151,7 +151,7 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 	if modify:
 		emit_signal("tiles_modified")
 	if data == null or data.empty():
-		if y <= _max_y:
+		if y <= _max_y: # && y in _beat_map_nodes:
 			if modify:
 				_scene.beat_map.erase(y)
 			_beat_map_nodes[y].queue_free()
@@ -219,7 +219,7 @@ func refresh():
 			y += 1
 		else:
 			y = key
-		_set_tile(y, _scene.beat_map[key], false, key)
+		_set_tile(y, _scene.beat_map[key], not _collapse_spaces, key)
 
 func _set_max_y(val):
 	_max_y = val
@@ -250,7 +250,7 @@ func get_current_time():
 	return _scrolling.rect_position.y/(-song_bps*((_scene.tile_size.y/2.0)*song_speed))
 
 func play_notes(bmp, speed, time=0):
-	song_bps = bmp/60
+	song_bps = bmp
 	song_speed = speed
 	song_time = time
 	song_playing = true
@@ -266,7 +266,7 @@ onready var _keyboard_selection_box_color = _keyboard_selection_box.color
 
 func notes_step(delta):
 	song_time += delta
-	song_scroll_y = song_bps*song_time*((_scene.tile_size.y/2.0)*song_speed)
+	song_scroll_y = song_bps*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
 	_set_scroll_y(song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
