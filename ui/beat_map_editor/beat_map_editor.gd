@@ -114,7 +114,7 @@ func save_beat_map():
 	file.open(currently_open_file,File.WRITE)
 	var array_beat_map = [
 		int(BMP_txt.text),
-		int(speed_multiplier_txt.text),
+		float(speed_multiplier_txt.text),
 		int(song_index_txt.text),
 	]
 	var beat_map_keys = beat_map.keys()
@@ -213,7 +213,7 @@ func _on_PlaySongFromStart_pressed():
 		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
-		note_editor.play_notes(int(BMP_txt.text), int(BMP_txt.text)/60.0 * int(speed_multiplier_txt.text))
+		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text))
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
 
@@ -229,7 +229,7 @@ func _on_PlaySongFromHere_pressed():
 		player.volume_db = -20
 		player.play()
 		player.seek(note_editor.get_current_time())
-		note_editor.play_notes(int(BMP_txt.text), int(BMP_txt.text)/60.0 * int(speed_multiplier_txt.text), note_editor.get_current_time())
+		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), note_editor.get_current_time())
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
 
