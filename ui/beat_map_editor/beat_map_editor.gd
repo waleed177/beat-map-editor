@@ -17,11 +17,11 @@ var _confirmation_dialog_confirmed = false
 export(NodePath) var note_editor_path
 onready var note_editor = get_node(note_editor_path)
 export(NodePath) var BMP_txt_path
-onready var BMP_txt: TextEdit = get_node(BMP_txt_path)
+onready var BMP_txt: LineEdit = get_node(BMP_txt_path)
 export(NodePath) var speed_multiplier_txt_path
-onready var speed_multiplier_txt: TextEdit = get_node(speed_multiplier_txt_path)
+onready var speed_multiplier_txt: LineEdit = get_node(speed_multiplier_txt_path)
 export(NodePath) var song_index_txt_path
-onready var song_index_txt: TextEdit = get_node(song_index_txt_path)
+onready var song_index_txt: LineEdit = get_node(song_index_txt_path)
 
 export(NodePath) var open_file_label_path
 onready var open_file_label: Label = get_node(open_file_label_path)
@@ -228,8 +228,8 @@ func _on_PlaySongFromHere_pressed():
 		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
-		player.seek(note_editor.get_current_time())
-		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), note_editor.get_current_time())
+		player.seek(note_editor._get_time_from_y())
+		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), true)
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
 

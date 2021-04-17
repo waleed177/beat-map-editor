@@ -240,20 +240,20 @@ func _on_VScrollBar_scrolling():
 
 ########################################
 var song_time_delay = AudioServer.get_time_to_next_mix() + AudioServer.get_output_latency()
-var song_bps
+var song_bpm
 var song_speed
 var song_playing = false
 var song_time = 0
 var song_scroll_y = 0
 
-func get_current_time():
-	return _scrolling.rect_position.y/(-song_bps*((_scene.tile_size.y/2.0)*song_speed))
-
-func play_notes(bmp, speed, time=0):
-	song_bps = bmp
+func play_notes(bpm, speed, from_current_y = false):
+	song_bpm = float(bpm)
 	song_speed = speed
-	song_time = time
+	song_time = _get_time_from_y() if from_current_y else 0
 	song_playing = true
+
+func _get_time_from_y():
+	return _current_y/(song_bpm*(8.0/120.0))
 
 func stop_playing():
 	song_playing = false
@@ -266,7 +266,7 @@ onready var _keyboard_selection_box_color = _keyboard_selection_box.color
 
 func notes_step(delta):
 	song_time += delta
-	song_scroll_y = song_bps*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
+	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
 	_set_scroll_y(song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
