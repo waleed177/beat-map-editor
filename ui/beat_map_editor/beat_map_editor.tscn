@@ -42,8 +42,8 @@ rect_min_size = Vector2( 150, 52.5 )
 window_title = "Select songs folder beatmap"
 access = 2
 filters = PoolStringArray( "*.json" )
-current_dir = "/home/waldo/Documents/GodotProjects/MakingTools"
-current_path = "/home/waldo/Documents/GodotProjects/MakingTools/"
+current_dir = "/Users/lilia/OneDrive/Documents/GitHub/bunnythm/bunnythm"
+current_path = "/Users/lilia/OneDrive/Documents/GitHub/bunnythm/bunnythm/"
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
 margin_right = 1024.0
