@@ -47,7 +47,6 @@ func _ready():
 	plugin.connect("resource_saved", self, "_on_resource_saved")
 	confirmation_dialog.connect("confirmed", self, "_on_confirmation_dialog_confirmed")
 
-
 func _on_resource_saved(resource):
 	if visible:
 		_on_SaveBeatmap_pressed()

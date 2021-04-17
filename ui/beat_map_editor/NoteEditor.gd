@@ -120,7 +120,21 @@ func _gui_input(event):
 							undo_redo.commit_action()
 				BUTTON_RIGHT:
 					if tile_x == 0:
-						_undoable_set_tile(tile_y, {})
+						match mode:
+							"place":
+								_undoable_set_tile(tile_y, {})
+							"paste":
+								var undo_redo: UndoRedo = _scene.plugin.undo_redo
+								undo_redo.create_action("Clear")
+								for i in _better_range(_clipboard["from"], _clipboard["to"], 100):
+									_undoable_set_tile(tile_y+i-min(_clipboard["from"], _clipboard["to"]), {}, false)
+								undo_redo.commit_action()
+							"select":
+								var undo_redo: UndoRedo = _scene.plugin.undo_redo
+								undo_redo.create_action("Clear")
+								for i in _better_range(_selection_first_position, _selection_second_position, 100):
+									_undoable_set_tile(i, {}, false)
+								undo_redo.commit_action()
 				BUTTON_WHEEL_UP:
 					_scrolling.rect_position += Vector2.DOWN * _scroll_speed
 					_refresh_scroll_bar()
@@ -151,7 +165,7 @@ func _set_tile(y: int, data, modify: bool = true, actual_y: int = -1):
 	if modify:
 		emit_signal("tiles_modified")
 	if data == null or data.empty():
-		if y <= _max_y: # && y in _beat_map_nodes:
+		if y <= _max_y && y in _beat_map_nodes:
 			if modify:
 				_scene.beat_map.erase(y)
 			_beat_map_nodes[y].queue_free()
