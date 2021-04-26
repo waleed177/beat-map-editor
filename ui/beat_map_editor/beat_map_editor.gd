@@ -27,8 +27,7 @@ export(NodePath) var open_file_label_path
 onready var open_file_label: Label = get_node(open_file_label_path)
 
 # 1 (4), 1/2 (8), 1/4 (16), 1/16 (64)
-var note_type_order = [0, 3, 2, 3, 1, 3, 2, 3] #for display
-var note_type_order_save = [4, 64, 16, 64, 8, 64, 16, 64] #for save
+var note_type_order = [0, 3, 2, 3, 1, 3, 2, 3] 
 var currently_open_file = ""
 var modified = false
 
@@ -57,7 +56,7 @@ func _on_tiles_modified():
 	refresh_open_file_label()
 
 func get_note_type(y: int, save: bool = false):
-	return (note_type_order_save if save else note_type_order)[y % len(note_type_order)]
+	return note_type_order[y % len(note_type_order)]
 
 func get_texture_atlas(tileset: TileSet, id: int):
 	var texture = tileset.tile_get_texture(id)
