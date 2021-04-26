@@ -356,6 +356,7 @@ margin_top = 462.0
 margin_right = 144.0
 margin_bottom = 482.0
 text = "Paste"
+
 [connection signal="scrolling" from="VBoxContainer/HBoxContainer/NoteEditor/VScrollBar" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_VScrollBar_scrolling"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveSettings" to="." method="_on_SaveSettings_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveBeatmap" to="." method="_on_SaveBeatmap_pressed"]

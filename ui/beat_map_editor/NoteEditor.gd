@@ -33,6 +33,7 @@ func _ready():
 	focus_mode = Control.FOCUS_CLICK
 	_note_selector.connect("note_selection_changed", self, "_on_note_selection_changed")
 	_set_max_y(1)
+	update()
 
 func _on_note_selection_changed(note):
 	mode = "place"
@@ -121,7 +122,7 @@ func _gui_input(event):
 				BUTTON_RIGHT:
 					if tile_x == 0:
 						match mode:
-							"place":
+							"place", "none":
 								_undoable_set_tile(tile_y, {})
 							"paste":
 								var undo_redo: UndoRedo = _scene.plugin.undo_redo
@@ -137,9 +138,11 @@ func _gui_input(event):
 								undo_redo.commit_action()
 				BUTTON_WHEEL_UP:
 					_scrolling.rect_position += Vector2.DOWN * _scroll_speed
+					update()
 					_refresh_scroll_bar()
 				BUTTON_WHEEL_DOWN:
 					_scrolling.rect_position += Vector2.UP * _scroll_speed
+					update()					
 					_refresh_scroll_bar()
 				BUTTON_MIDDLE:
 					if tile_x == 0:
@@ -213,6 +216,7 @@ func _set_scroll_y(y):
 		_scrolling.rect_position.x,
 		min(0, rect_size.y/2  - _keyboard_selection_box.rect_size.y/2 - y)
 	)
+	update()
 	_refresh_scroll_bar()
 
 func _update_keyboard_selection_box():
@@ -251,6 +255,7 @@ func _on_CollapseSpaces_pressed():
 
 func _on_VScrollBar_scrolling():
 	_scrolling.rect_position.y = - _scene.tile_size.y * $VScrollBar.value
+	update()
 
 ########################################
 var song_time_delay = AudioServer.get_time_to_next_mix() + AudioServer.get_output_latency()
@@ -299,3 +304,17 @@ func _better_range(from: int, to: int, max_range: int):
 	if abs(from-to) > max_range:
 		to = from + max_range*dir
 	return range(from, to+dir, dir)
+
+func _draw():
+	var scroll_y = -int(_scrolling.rect_position.y / _tile_size.y)
+	for i in range(0, ceil(rect_size.y / _tile_size.y) + 1):
+		var y = i * _tile_size.y + fmod(_scrolling.rect_position.y, _tile_size.y)
+		draw_string(
+			get_font(""), Vector2(0, y - _tile_size.y/1.2), str(i + scroll_y)
+		)
+		draw_line(
+			Vector2(0, y), 
+			Vector2(rect_size.x, y),
+			Color.black,
+			2 if (i + scroll_y) % 4 == 0 else 1
+		)
