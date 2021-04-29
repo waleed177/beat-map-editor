@@ -37,6 +37,8 @@ var song_file_path
 var songs
 var songs_directory
 
+var number_of_lanes = 4
+
 func _ready():
 	EDITOR_SETTINGS_PATH = filename.get_base_dir() + "/../../editor_settings.json"
 	load_editor_settings(EDITOR_SETTINGS_PATH)
@@ -116,17 +118,29 @@ func save_beat_map():
 		int(song_index_txt.text),
 	]
 	var beat_map_keys = beat_map.keys()
-	beat_map_keys.sort()
-	var max_index = beat_map_keys[len(beat_map_keys)-1]
+	beat_map_keys.sort_custom(self, "_beat_map_keys_sorter")
+	var max_index = int(beat_map_keys[len(beat_map_keys)-1].split(" ")[1])
+	
+	for i in number_of_lanes:
+		array_beat_map.append([])
 	
 	for key in beat_map_keys:
-		array_beat_map.append([get_note_type(key, true), key, int(beat_map[key].name)])
+		var sp = key.split(" ")
+		var x = int(sp[0])
+		var y = int(sp[1])
+		var arr = array_beat_map[x+3]
+		arr.append([get_note_type(y, true), y, int(beat_map[key].name)])
+	
 	file.store_string(JSON.print(array_beat_map))
 	file.close()
 	modified = false
 	refresh_open_file_label()
 	print("Saved beatmap at " + currently_open_file)
 
+func _beat_map_keys_sorter(key_a:String, key_b: String):
+	var y1 = int(key_a.split(" ")[1])
+	var y2 = int(key_b.split(" ")[1])
+	return y1 < y2 
 
 func _on_SaveBeatmap_pressed():
 	if currently_open_file.empty():
@@ -259,13 +273,15 @@ func _on_file_selected(path):
 			speed_multiplier_txt.text = str(beat_map_array[1])
 			song_index_txt.text = str(beat_map_array[2])
 			beat_map.clear()
-			for i in range(3, len(beat_map_array)):
-				var arr = beat_map_array[i]
-				var y = arr[1]
-				var name = arr[2]
-				beat_map[y] = {
-					name=name
-				}
+			for x in beat_map_array.size()-3:
+				var beat_map_1d = beat_map_array[x+3]
+				for i in range(0, len(beat_map_1d)):
+					var arr = beat_map_1d[i]
+					var y = arr[1]
+					var name = arr[2]
+					beat_map[str(x) + " " + str(y)] = {
+						name=name
+					}
 			note_editor.refresh()
 			currently_open_file = path
 			refresh_open_file_label()

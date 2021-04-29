@@ -14,7 +14,6 @@ var _beat_map_nodes = {}
 var _scroll_speed = 25
 var _current_keyboard_position := Vector2(0, 0)
 var _max_y = 0
-var _number_of_lanes = 4
 
 var _key_numbers = range(KEY_0, KEY_9+1)
 var _collapse_spaces = false
@@ -33,7 +32,7 @@ var _clipboard = {
 func _ready():
 	focus_mode = Control.FOCUS_CLICK
 	_note_selector.connect("note_selection_changed", self, "_on_note_selection_changed")
-	_scrolling.rect_position.x = rect_size.x/2 + _scrolling.rect_size.x/2 - _scene.tile_size.x*(_number_of_lanes)/2
+	_scrolling.rect_position.x = rect_size.x/2 + _scrolling.rect_size.x/2 - _scene.tile_size.x*(_scene.number_of_lanes)/2
 	_set_max_y(1)
 	update()
 	_refresh_scroll_bar()
@@ -59,7 +58,7 @@ func _on_CopyButton_pressed():
 	_clipboard["data"] = {}
 	_clipboard["from"] = _selection_first_position
 	_clipboard["to"] = _selection_second_position
-	for i in _better_range(_selection_first_position.x, _selection_second_position.x, _number_of_lanes):
+	for i in _better_range(_selection_first_position.x, _selection_second_position.x, _scene.number_of_lanes):
 		for j in _better_range(_selection_first_position.y, _selection_second_position.y, 200):
 			_clipboard["data"][str(i) + " " + str(j)] = _get_tile(i, j)
 
@@ -101,15 +100,8 @@ func _gui_input(event):
 				
 				_selection_box.rect_position = vector_pmul(vector_min_coord(_selection_first_position, _selection_second_position),  _scene.tile_size)
 				_selection_box.rect_size = vector_pmul(vector_abs(vector_comp_abs_add(delta, 1)), _scene.tile_size)
-				
-#					if delta >= 0:
-#						_selection_box.rect_size.y = (delta+1)*_tile_size.y
-#						_selection_box.rect_position = Vector2(_selection_box.rect_position.x, _selection_first_position*_tile_size.y)
-#					else:
-#						_selection_box.rect_size.y = (-delta+1)*_tile_size.y
-#						_selection_box.rect_position = Vector2(_selection_box.rect_position.x, _selection_second_position*_tile_size.y)
 		else:
-			if 0 <= tile_x and tile_x < _number_of_lanes:
+			if 0 <= tile_x and tile_x < _scene.number_of_lanes:
 				_selection_box.rect_position = Vector2(tile_x*_tile_size.x, tile_y*_tile_size.y)
 			else:
 				_selection_box.hide()
@@ -122,7 +114,7 @@ func _gui_input(event):
 				BUTTON_LEFT:
 					match mode:
 						"place":
-							if 0 <= tile_x and tile_x < _number_of_lanes:
+							if 0 <= tile_x and tile_x < _scene.number_of_lanes:
 								_undoable_set_tile(tile_x, tile_y, { 
 									name = _note_selector.selected_note
 								})
@@ -135,13 +127,13 @@ func _gui_input(event):
 							undo_redo.create_action("Paste")
 							var min_x = min(_clipboard["from"].x, _clipboard["to"].x)
 							var min_y = min(_clipboard["from"].y, _clipboard["to"].y)
-							for i in _better_range(_clipboard["from"].x, _clipboard["to"].x, _number_of_lanes):
+							for i in _better_range(_clipboard["from"].x, _clipboard["to"].x, _scene.number_of_lanes):
 								for j in _better_range(_clipboard["from"].y, _clipboard["to"].y, 200):
 									var str_pos = str(i) + " " + str(j)
 									_undoable_set_tile(tile_x+i-min_x, tile_y+j-min_y, _clipboard["data"][str_pos] if str_pos in _clipboard["data"] else {}, false)
 							undo_redo.commit_action()
 				BUTTON_RIGHT:
-					if 0 <= tile_x and tile_x < _number_of_lanes:
+					if 0 <= tile_x and tile_x < _scene.number_of_lanes:
 						match mode:
 							"place", "none":
 								_undoable_set_tile(tile_x, tile_y, {})
@@ -150,7 +142,7 @@ func _gui_input(event):
 								undo_redo.create_action("Clear")
 								var min_x = min(_clipboard["from"].x, _clipboard["to"].x)
 								var min_y = min(_clipboard["from"].y, _clipboard["to"].y)
-								for i in _better_range(_clipboard["from"].x, _clipboard["to"].x, _number_of_lanes):
+								for i in _better_range(_clipboard["from"].x, _clipboard["to"].x, _scene.number_of_lanes):
 									for j in _better_range(_clipboard["from"].y, _clipboard["to"].y, 200):
 										_undoable_set_tile(tile_x+i-min_x, tile_y+j-min_y, {}, false)
 								undo_redo.commit_action()
@@ -158,7 +150,7 @@ func _gui_input(event):
 								var undo_redo: UndoRedo = _scene.plugin.undo_redo
 								undo_redo.create_action("Clear")
 								
-								for i in _better_range(_selection_first_position.x, _selection_second_position.x, _number_of_lanes):
+								for i in _better_range(_selection_first_position.x, _selection_second_position.x, _scene.number_of_lanes):
 									for j in _better_range(_selection_first_position.y, _selection_second_position.y, 200):
 										_undoable_set_tile(i, j, {}, false)
 								undo_redo.commit_action()
@@ -171,7 +163,7 @@ func _gui_input(event):
 					update()
 					_refresh_scroll_bar()
 				BUTTON_MIDDLE:
-					if 0 <= tile_x and tile_x < _number_of_lanes:
+					if 0 <= tile_x and tile_x < _scene.number_of_lanes:
 						_current_keyboard_position.x = tile_x
 						_current_keyboard_position.y = tile_y
 						_update_keyboard_selection_box()
@@ -189,7 +181,7 @@ func _refresh_scroll_bar():
 
 
 func _set_tile(x: int, y: int, data, modify: bool = true, actual_y: int = -1):
-	if 0 > x or x >= _number_of_lanes: return false
+	if 0 > x or x >= _scene.number_of_lanes: return false
 	var pos_str = str(x) + " " + str(y)
 	assert(y != NAN)
 	if y < 0:
@@ -263,17 +255,22 @@ func refresh():
 	for key in _beat_map_nodes:
 		_beat_map_nodes[key].queue_free()
 	_beat_map_nodes.clear()
-	var y = -1
 	var sorted_keys = _scene.beat_map.keys()
-	sorted_keys.sort()
-	_set_max_y(sorted_keys[len(sorted_keys) - 1])
+	sorted_keys.sort_custom(self, "_beat_map_nodes_sorter")
+	_set_max_y(int(sorted_keys[len(sorted_keys) - 1].split(" ")[1]))
 	for key in sorted_keys:
-		if _collapse_spaces:
-			y += 1
-		else:
-			y = key
-		_set_tile(0, y, _scene.beat_map[key], not _collapse_spaces, key)
+#		if _collapse_spaces:
+#			y += 1
+#		else:
+#			y = key
+		var xy = key.split(" ")
+		var x = int(xy[0])
+		var y = int(xy[1])
+		_set_tile(x, y, _scene.beat_map[key], not _collapse_spaces, y)
 	update()
+
+func _beat_map_nodes_sorter(stra, strb):
+	return int(stra.split(" ")[1]) < int(strb.split(" ")[1]) 
 
 func _set_max_y(val):
 	_max_y = val
@@ -378,7 +375,7 @@ func _draw():
 			Vector2(_scrolling.rect_position.x, rect_size.y),
 			Color(0.1, 0.1, 0.1)
 		)
-		var line_x = _scrolling.rect_position.x + _scene.tile_size.x*(_number_of_lanes)
+		var line_x = _scrolling.rect_position.x + _scene.tile_size.x*(_scene.number_of_lanes)
 		draw_line(
 			Vector2(line_x, 0),
 			Vector2(line_x, rect_size.y),
