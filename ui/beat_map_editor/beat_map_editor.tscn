@@ -154,6 +154,8 @@ __meta__ = {
 [node name="Scrolling" type="Control" parent="VBoxContainer/HBoxContainer/NoteEditor"]
 anchor_left = 0.5
 anchor_right = 0.5
+margin_left = -128.0
+margin_right = -128.0
 mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -174,8 +176,7 @@ __meta__ = {
 [node name="KeyboardSelectionBox" type="ColorRect" parent="VBoxContainer/HBoxContainer/NoteEditor/Scrolling"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -32.0
-margin_right = 32.0
+margin_right = 64.0
 margin_bottom = 64.0
 mouse_filter = 1
 color = Color( 0.0784314, 1, 0, 0.25098 )

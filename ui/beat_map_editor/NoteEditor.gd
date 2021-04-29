@@ -20,22 +20,25 @@ var _key_numbers = range(KEY_0, KEY_9+1)
 var _collapse_spaces = false
 var mode = "none"
 var _selection_currently_selecting = false
-var _selection_first_position: Vector2
-var _selection_second_position: Vector2
+var _selection_first_position := Vector2(0, 0)
+var _selection_second_position := Vector2(0, 0)
 var _selection_stabilize_selection = false
 
 var _clipboard = {
 	data = {},
-	from = 0,
-	to = 0
+	from = Vector2(0,0),
+	to = Vector2(0,0)
 }
 
 func _ready():
 	focus_mode = Control.FOCUS_CLICK
 	_note_selector.connect("note_selection_changed", self, "_on_note_selection_changed")
-	_scrolling.rect_position.x -= _scene.tile_size.x*(_number_of_lanes)/2
+	_scrolling.rect_position.x = rect_size.x/2 + _scrolling.rect_size.x/2 - _scene.tile_size.x*(_number_of_lanes)/2
 	_set_max_y(1)
 	update()
+	_refresh_scroll_bar()
+	_update_keyboard_selection_box()
+	
 
 func _on_note_selection_changed(note):
 	mode = "place"
@@ -85,30 +88,31 @@ func _gui_input(event):
 		var pos = event.position - _scrolling.rect_position
 		var tile_x = floor(pos.x/_tile_size.x)
 		var tile_y = floor(pos.y/_tile_size.y)
-		if 0 <= tile_x and tile_x < _number_of_lanes:
-			_selection_box.show()
-			if mode == "paste":
-				_selection_first_position = Vector2(tile_x, tile_y)
-				_selection_second_position = _selection_first_position + vector_abs(_clipboard["to"]-_clipboard["from"])
-			if _selection_currently_selecting:
-				if not _selection_stabilize_selection:
-					if mode != "paste":
-						_selection_second_position = Vector2(tile_x,tile_y)
-					var delta = _selection_second_position-_selection_first_position
-					
-					_selection_box.rect_position = vector_pmul(vector_min_coord(_selection_first_position, _selection_second_position),  _scene.tile_size)
-					_selection_box.rect_size = vector_pmul(vector_abs(vector_comp_abs_add(delta, 1)), _scene.tile_size)
-					
+		
+		_selection_box.show()
+		if mode == "paste":
+			_selection_first_position = Vector2(tile_x, tile_y)
+			_selection_second_position = _selection_first_position + vector_abs(_clipboard["to"]-_clipboard["from"])
+		if _selection_currently_selecting:
+			if not _selection_stabilize_selection:
+				if mode != "paste":
+					_selection_second_position = Vector2(tile_x,tile_y)
+				var delta = _selection_second_position-_selection_first_position
+				
+				_selection_box.rect_position = vector_pmul(vector_min_coord(_selection_first_position, _selection_second_position),  _scene.tile_size)
+				_selection_box.rect_size = vector_pmul(vector_abs(vector_comp_abs_add(delta, 1)), _scene.tile_size)
+				
 #					if delta >= 0:
 #						_selection_box.rect_size.y = (delta+1)*_tile_size.y
 #						_selection_box.rect_position = Vector2(_selection_box.rect_position.x, _selection_first_position*_tile_size.y)
 #					else:
 #						_selection_box.rect_size.y = (-delta+1)*_tile_size.y
 #						_selection_box.rect_position = Vector2(_selection_box.rect_position.x, _selection_second_position*_tile_size.y)
-			else:
-				_selection_box.rect_position = Vector2(tile_x*_tile_size.x, tile_y*_tile_size.y)
 		else:
-			_selection_box.hide()
+			if 0 <= tile_x and tile_x < _number_of_lanes:
+				_selection_box.rect_position = Vector2(tile_x*_tile_size.x, tile_y*_tile_size.y)
+			else:
+				_selection_box.hide()
 	if event is InputEventMouseButton:
 		var pos = event.position - _scrolling.rect_position
 		var tile_x = floor(pos.x/_tile_size.x)
@@ -185,6 +189,7 @@ func _refresh_scroll_bar():
 
 
 func _set_tile(x: int, y: int, data, modify: bool = true, actual_y: int = -1):
+	if 0 > x or x >= _number_of_lanes: return false
 	var pos_str = str(x) + " " + str(y)
 	assert(y != NAN)
 	if y < 0:
@@ -198,8 +203,14 @@ func _set_tile(x: int, y: int, data, modify: bool = true, actual_y: int = -1):
 			_beat_map_nodes[pos_str].queue_free()
 			_beat_map_nodes.erase(pos_str)
 			if y == _max_y:
-				_set_max_y(_beat_map_nodes.keys().max())
-	elif not y in _beat_map_nodes or _beat_map_nodes[y] == null:
+				var max_y = 0
+				for key in _beat_map_nodes.keys():
+					var num = int(key.split(" ")[0]) 
+					if num > max_y:
+						max_y = num
+						print(num)
+				_set_max_y(max_y)
+	elif not pos_str in _beat_map_nodes or _beat_map_nodes[pos_str] == null:
 		if modify:
 			_scene.beat_map[pos_str] = data
 		
@@ -312,6 +323,7 @@ func notes_step(delta):
 	song_time += delta
 	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
 	_set_scroll_y(song_scroll_y)
+	_keyboard_selection_box.rect_position = Vector2(_current_keyboard_position.x*_tile_size.x, song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 	if _current_keyboard_position.y != new_y:
@@ -360,6 +372,17 @@ func _draw():
 			Vector2(rect_size.x, y),
 			Color.black,
 			2 if current_y_int % 4 == 0 else 1
+		)
+		draw_line(
+			Vector2(_scrolling.rect_position.x, 0),
+			Vector2(_scrolling.rect_position.x, rect_size.y),
+			Color(0.1, 0.1, 0.1)
+		)
+		var line_x = _scrolling.rect_position.x + _scene.tile_size.x*(_number_of_lanes)
+		draw_line(
+			Vector2(line_x, 0),
+			Vector2(line_x, rect_size.y),
+			Color(0.1, 0.1, 0.1)
 		)
 
 

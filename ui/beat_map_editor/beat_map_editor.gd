@@ -162,14 +162,13 @@ func show_save_beatmap_dialog():
 
 func _on_ClearBeatmap_pressed():
 	var undo_redo: UndoRedo = plugin.undo_redo
-	var beat_map_clone = beat_map.duplicate()
 	undo_redo.create_action("Clear Beatmap")
 	undo_redo.add_do_method(self, "_clear_beatmap")
-	undo_redo.add_undo_property(self, "beat_map", beat_map_clone)
+	undo_redo.add_undo_property(self, "beat_map",  beat_map.duplicate())
 	undo_redo.add_do_method(note_editor, "refresh")
 	undo_redo.add_undo_method(note_editor, "refresh")
-	undo_redo.add_do_property(note_editor, "_current_y", 0)
-	undo_redo.add_undo_property(note_editor, "_current_y", note_editor._current_y)
+	undo_redo.add_do_property(note_editor, "_current_keyboard_position", Vector2(0, 0))
+	undo_redo.add_undo_property(note_editor, "_current_keyboard_position", note_editor._current_keyboard_position)
 	undo_redo.add_do_method(note_editor, "_update_keyboard_selection_box")
 	undo_redo.add_undo_method(note_editor, "_update_keyboard_selection_box")
 	undo_redo.commit_action()
@@ -185,7 +184,7 @@ func _on_NewBeatmap_pressed():
 		clear = _confirmation_dialog_confirmed
 	if clear:
 		beat_map.clear()
-		note_editor._current_y = 0
+		note_editor._current_keyboard_position = Vector2(0, 0)
 		note_editor._update_keyboard_selection_box()
 		note_editor.refresh()
 		currently_open_file = ""
@@ -270,7 +269,7 @@ func _on_file_selected(path):
 			note_editor.refresh()
 			currently_open_file = path
 			refresh_open_file_label()
-			note_editor._current_y = 0
+			note_editor._current_keyboard_position =  Vector2(0, 0)
 			note_editor._update_keyboard_selection_box()
 			note_editor.refresh()
 
