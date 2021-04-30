@@ -58,15 +58,9 @@ dialog_hide_on_ok = false
 margin_right = 1024.0
 margin_bottom = 600.0
 
-[node name="Label" type="Label" parent="VBoxContainer"]
-margin_right = 1024.0
-margin_bottom = 14.0
-text = "144"
-
 [node name="Panel" type="Panel" parent="VBoxContainer"]
-margin_top = 18.0
 margin_right = 1024.0
-margin_bottom = 38.0
+margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
 
 [node name="OpenFile" type="Label" parent="VBoxContainer/Panel"]
@@ -78,7 +72,7 @@ __meta__ = {
 }
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 42.0
+margin_top = 24.0
 margin_right = 1024.0
 margin_bottom = 600.0
 size_flags_horizontal = 3
@@ -89,7 +83,7 @@ __meta__ = {
 
 [node name="NoteSelector" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
 margin_right = 160.0
-margin_bottom = 558.0
+margin_bottom = 576.0
 rect_min_size = Vector2( 160, 0 )
 size_flags_vertical = 3
 custom_constants/margin_right = 10
@@ -99,7 +93,7 @@ script = ExtResource( 1 )
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/NoteSelector"]
 margin_left = 10.0
 margin_right = 150.0
-margin_bottom = 558.0
+margin_bottom = 576.0
 
 [node name="NotesLbl" type="Label" parent="VBoxContainer/HBoxContainer/NoteSelector/VBoxContainer"]
 margin_right = 140.0
@@ -114,7 +108,7 @@ __meta__ = {
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HBoxContainer/NoteSelector/VBoxContainer"]
 margin_top = 18.0
 margin_right = 140.0
-margin_bottom = 558.0
+margin_bottom = 576.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 __meta__ = {
@@ -124,7 +118,7 @@ __meta__ = {
 [node name="NotesContainer" type="GridContainer" parent="VBoxContainer/HBoxContainer/NoteSelector/VBoxContainer/ScrollContainer"]
 modulate = Color( 0.878431, 0.862745, 0.85098, 1 )
 margin_right = 140.0
-margin_bottom = 540.0
+margin_bottom = 558.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 2
@@ -135,7 +129,7 @@ __meta__ = {
 [node name="NoteEditor" type="Control" parent="VBoxContainer/HBoxContainer"]
 margin_left = 164.0
 margin_right = 856.0
-margin_bottom = 558.0
+margin_bottom = 576.0
 rect_min_size = Vector2( 400, 0 )
 rect_clip_content = true
 focus_mode = 1
@@ -193,7 +187,7 @@ __meta__ = {
 [node name="Actions" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
 margin_left = 860.0
 margin_right = 1024.0
-margin_bottom = 558.0
+margin_bottom = 576.0
 rect_min_size = Vector2( 150, 0 )
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
@@ -204,7 +198,7 @@ custom_constants/margin_bottom = 10
 margin_left = 10.0
 margin_top = 10.0
 margin_right = 154.0
-margin_bottom = 548.0
+margin_bottom = 566.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
