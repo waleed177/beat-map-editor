@@ -69,8 +69,10 @@ func _on_PasteButton_pressed():
 
 func _unhandled_key_input(event):
 	if event.pressed and event.scancode in _scene.keyboard_note_shortcuts:
-		_undoable_set_tile(_current_keyboard_position.x, _current_keyboard_position.y, {
-			name= _scene.keyboard_note_shortcuts[event.scancode]
+		var key_data =  _scene.keyboard_note_shortcuts[event.scancode]
+		
+		_undoable_set_tile(_current_keyboard_position.x if key_data.x == -1 else key_data.x, _current_keyboard_position.y, {
+			name= _scene.keyboard_note_shortcuts[event.scancode].tile_name
 		})
 		if not song_playing:
 			_current_keyboard_position.y += 1

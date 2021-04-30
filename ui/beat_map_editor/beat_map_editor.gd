@@ -87,7 +87,7 @@ func load_editor_settings(file_path):
 	keyboard_note_shortcuts = {}
 	keyboard_note_shortcuts_inv = {}
 	for key in dict_keyboard_note_shortcuts:
-		keyboard_note_shortcuts_inv[dict_keyboard_note_shortcuts[key]] = int(key)
+		keyboard_note_shortcuts_inv[dict_keyboard_note_shortcuts[key].tile_name] = int(key)
 		keyboard_note_shortcuts[int(key)] = dict_keyboard_note_shortcuts[key]
 	song_file_path = dict["song_file_path"]
 	songs_directory = dict["songs_directory"]
