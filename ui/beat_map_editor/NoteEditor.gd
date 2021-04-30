@@ -149,7 +149,7 @@ func _gui_input(event):
 							"select":
 								var undo_redo: UndoRedo = _scene.plugin.undo_redo
 								undo_redo.create_action("Clear")
-								
+
 								for i in _better_range(_selection_first_position.x, _selection_second_position.x, _scene.number_of_lanes):
 									for j in _better_range(_selection_first_position.y, _selection_second_position.y, 200):
 										_undoable_set_tile(i, j, {}, false)
@@ -181,15 +181,15 @@ func _refresh_scroll_bar():
 
 
 func _set_tile(x: int, y: int, data, modify: bool = true, actual_y: int = -1):
-	if 0 > x or x >= _scene.number_of_lanes: return false
 	var pos_str = str(x) + " " + str(y)
+	if 0 > x or x >= _scene.number_of_lanes: return false
 	assert(y != NAN)
 	if y < 0:
 		return
 	if modify:
 		emit_signal("tiles_modified")
 	if data == null or data.empty():
-		if y <= _max_y && pos_str in _beat_map_nodes:
+		if pos_str in _beat_map_nodes:
 			if modify:
 				_scene.beat_map.erase(pos_str)
 			_beat_map_nodes[pos_str].queue_free()
@@ -197,7 +197,7 @@ func _set_tile(x: int, y: int, data, modify: bool = true, actual_y: int = -1):
 			if y == _max_y:
 				var max_y = 0
 				for key in _beat_map_nodes.keys():
-					var num = int(key.split(" ")[0]) 
+					var num = int(key.split(" ")[1]) 
 					if num > max_y:
 						max_y = num
 						print(num)
@@ -327,7 +327,7 @@ func notes_step(delta):
 		_current_keyboard_position.y = new_y
 		_update_keyboard_selection_box()
 		_keyboard_selection_box.color = Color.lightgreen
-		yield(get_tree().create_timer(0.1), "timeout")
+		yield(get_tree().create_timer(0.05), "timeout")
 		_keyboard_selection_box.color = _keyboard_selection_box_color
 
 
