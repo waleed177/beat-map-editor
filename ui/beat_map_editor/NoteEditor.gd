@@ -248,7 +248,12 @@ func _set_scroll_y(y):
 	_refresh_scroll_bar()
 
 func _update_keyboard_selection_box():
-	_keyboard_selection_box.rect_position = Vector2(_current_keyboard_position.x*_tile_size.x, _current_keyboard_position.y*_tile_size.y)
+	if song_playing:
+		_keyboard_selection_box.rect_position = Vector2(0, _current_keyboard_position.y*_tile_size.y)
+		_keyboard_selection_box.rect_size = Vector2(_tile_size.x*_scene.number_of_lanes, _tile_size.y)
+	else:
+		_keyboard_selection_box.rect_position = Vector2(_current_keyboard_position.x*_tile_size.x, _current_keyboard_position.y*_tile_size.y)
+		_keyboard_selection_box.rect_size = Vector2(_tile_size.x, _tile_size.y)
 	_set_scroll_y(_current_keyboard_position.y*_tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 	_refresh_scroll_bar()
@@ -322,7 +327,7 @@ func notes_step(delta):
 	song_time += delta
 	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
 	_set_scroll_y(song_scroll_y)
-	_keyboard_selection_box.rect_position = Vector2(_current_keyboard_position.x*_tile_size.x, song_scroll_y)
+	_keyboard_selection_box.rect_position = Vector2(0, song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 	if _current_keyboard_position.y != new_y:

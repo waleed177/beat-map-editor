@@ -39,6 +39,9 @@ var songs_directory
 
 var number_of_lanes = 4
 
+func _process(delta):
+	$VBoxContainer/Label.text = str(Engine.get_frames_per_second())
+
 func _ready():
 	EDITOR_SETTINGS_PATH = filename.get_base_dir() + "/../../editor_settings.json"
 	load_editor_settings(EDITOR_SETTINGS_PATH)
