@@ -47,6 +47,14 @@ func _ready():
 	note_editor.connect("tiles_modified", self, "_on_tiles_modified")
 	plugin.connect("resource_saved", self, "_on_resource_saved")
 	confirmation_dialog.connect("confirmed", self, "_on_confirmation_dialog_confirmed")
+	
+	get_tree().get_root().connect("size_changed", self, "_on_window_resized")
+	_on_window_resized()
+
+func _on_window_resized():
+	var size = note_editor.rect_size.y/10
+	tile_size = Vector2(size, size)
+	note_editor.refresh()
 
 func _on_resource_saved(resource):
 	if visible:

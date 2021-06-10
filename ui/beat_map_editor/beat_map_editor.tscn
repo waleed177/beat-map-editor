@@ -1,13 +1,15 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/NoteSelector.gd" type="Script" id=1]
 [ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/NoteEditor.gd" type="Script" id=2]
 [ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/beat_map_editor.gd" type="Script" id=3]
+[ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/ViewportContainer.gd" type="Script" id=4]
+[ext_resource path="res://addons/beat_map_editor/click_004.ogg" type="AudioStream" id=5]
 
 [sub_resource type="StyleBoxFlat" id=1]
 resource_local_to_scene = true
-border_width_top = 251
-border_width_bottom = 251
+border_width_top = 259
+border_width_bottom = 259
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -136,6 +138,9 @@ focus_mode = 1
 size_flags_horizontal = 3
 script = ExtResource( 2 )
 
+[node name="Tick" type="AudioStreamPlayer" parent="VBoxContainer/HBoxContainer/NoteEditor"]
+stream = ExtResource( 5 )
+
 [node name="VScrollBar" type="VScrollBar" parent="VBoxContainer/HBoxContainer/NoteEditor"]
 anchor_left = 1.0
 anchor_right = 1.0
@@ -183,6 +188,25 @@ color = Color( 0.0784314, 1, 0, 0.25098 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer/NoteEditor"]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -165.0
+margin_right = -17.0
+grow_vertical = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="VBoxContainer/HBoxContainer/NoteEditor"]
+size = Vector2( 300, 300 )
+own_world = true
+handle_input_locally = false
+usage = 0
+render_target_update_mode = 3
+script = ExtResource( 4 )
 
 [node name="Actions" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
 margin_left = 860.0

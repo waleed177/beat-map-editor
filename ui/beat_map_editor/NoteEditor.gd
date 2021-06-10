@@ -9,7 +9,6 @@ onready var _scrolling = $Scrolling
 
 signal tiles_modified
 
-onready var _tile_size = _scene.tile_size
 var _beat_map_nodes = {}
 var _scroll_speed = 25
 var _current_keyboard_position := Vector2(0, 0)
@@ -32,24 +31,20 @@ var _clipboard = {
 func _ready():
 	focus_mode = Control.FOCUS_CLICK
 	_note_selector.connect("note_selection_changed", self, "_on_note_selection_changed")
-	_scrolling.rect_position.x = rect_size.x/2 + _scrolling.rect_size.x/2 - _scene.tile_size.x*(_scene.number_of_lanes)/2
-	_set_max_y(1)
-	update()
-	_refresh_scroll_bar()
-	_update_keyboard_selection_box()
+	refresh()
 	
 
 func _on_note_selection_changed(note):
 	mode = "place"
 	_selection_stabilize_selection = false
 	_selection_currently_selecting = false
-	_selection_box.rect_size = _tile_size
+	_selection_box.rect_size = _scene.tile_size
 
 func _on_NoTool_pressed():
 	mode = "none"
 	_selection_stabilize_selection = false
 	_selection_currently_selecting = false
-	_selection_box.rect_size = _tile_size
+	_selection_box.rect_size = _scene.tile_size
 
 func _on_SelectTool_pressed():
 	mode = "select"
@@ -87,8 +82,8 @@ func _gui_input(event):
 		return false
 	if event is InputEventMouseMotion:
 		var pos = event.position - _scrolling.rect_position
-		var tile_x = floor(pos.x/_tile_size.x)
-		var tile_y = floor(pos.y/_tile_size.y)
+		var tile_x = floor(pos.x/_scene.tile_size.x)
+		var tile_y = floor(pos.y/_scene.tile_size.y)
 		
 		_selection_box.show()
 		if mode == "paste":
@@ -104,13 +99,13 @@ func _gui_input(event):
 				_selection_box.rect_size = vector_pmul(vector_abs(vector_comp_abs_add(delta, 1)), _scene.tile_size)
 		else:
 			if 0 <= tile_x and tile_x < _scene.number_of_lanes:
-				_selection_box.rect_position = Vector2(tile_x*_tile_size.x, tile_y*_tile_size.y)
+				_selection_box.rect_position = Vector2(tile_x*_scene.tile_size.x, tile_y*_scene.tile_size.y)
 			else:
 				_selection_box.hide()
 	if event is InputEventMouseButton:
 		var pos = event.position - _scrolling.rect_position
-		var tile_x = floor(pos.x/_tile_size.x)
-		var tile_y = floor(pos.y/_tile_size.y)
+		var tile_x = floor(pos.x/_scene.tile_size.x)
+		var tile_y = floor(pos.y/_scene.tile_size.y)
 		if event.pressed:
 			match event.button_index:
 				BUTTON_LEFT:
@@ -216,7 +211,7 @@ func _set_tile(x: int, y: int, data, modify: bool = true, actual_y: int = -1):
 		texture_button.expand = true
 		texture_button.rect_size = _scene.tile_size
 		_scrolling.add_child(texture_button)
-		texture_button.rect_position = Vector2(x*_tile_size.x, y*_tile_size.y)
+		texture_button.rect_position = Vector2(x*_scene.tile_size.x, y*_scene.tile_size.y)
 		
 		_beat_map_nodes[pos_str] = texture_button
 		
@@ -249,31 +244,34 @@ func _set_scroll_y(y):
 
 func _update_keyboard_selection_box():
 	if song_playing:
-		_keyboard_selection_box.rect_position = Vector2(0, _current_keyboard_position.y*_tile_size.y)
-		_keyboard_selection_box.rect_size = Vector2(_tile_size.x*_scene.number_of_lanes, _tile_size.y)
+		_keyboard_selection_box.rect_position = Vector2(0, _current_keyboard_position.y*_scene.tile_size.y)
+		_keyboard_selection_box.rect_size = Vector2(_scene.tile_size.x*_scene.number_of_lanes, _scene.tile_size.y)
 	else:
-		_keyboard_selection_box.rect_position = Vector2(_current_keyboard_position.x*_tile_size.x, _current_keyboard_position.y*_tile_size.y)
-		_keyboard_selection_box.rect_size = Vector2(_tile_size.x, _tile_size.y)
-	_set_scroll_y(_current_keyboard_position.y*_tile_size.y)
+		_keyboard_selection_box.rect_position = Vector2(_current_keyboard_position.x*_scene.tile_size.x, _current_keyboard_position.y*_scene.tile_size.y)
+		_keyboard_selection_box.rect_size = Vector2(_scene.tile_size.x, _scene.tile_size.y)
+	_set_scroll_y(_current_keyboard_position.y*_scene.tile_size.y)
 	$VScrollBar.value = abs(_scrolling.rect_position.y) / _scene.tile_size.y
 	_refresh_scroll_bar()
 
 func refresh():
+	_scrolling.rect_position.x = rect_size.x/2 + _scrolling.rect_size.x/2 - _scene.tile_size.x*(_scene.number_of_lanes)/2
+	_set_max_y(1)
+	update()
+	_refresh_scroll_bar()
+	_update_keyboard_selection_box()
+	
 	for key in _beat_map_nodes:
 		_beat_map_nodes[key].queue_free()
 	_beat_map_nodes.clear()
-	var sorted_keys = _scene.beat_map.keys()
-	sorted_keys.sort_custom(self, "_beat_map_nodes_sorter")
-	_set_max_y(int(sorted_keys[len(sorted_keys) - 1].split(" ")[1]))
-	for key in sorted_keys:
-#		if _collapse_spaces:
-#			y += 1
-#		else:
-#			y = key
-		var xy = key.split(" ")
-		var x = int(xy[0])
-		var y = int(xy[1])
-		_set_tile(x, y, _scene.beat_map[key], not _collapse_spaces, y)
+	if not _scene.beat_map.empty():
+		var sorted_keys = _scene.beat_map.keys()
+		sorted_keys.sort_custom(self, "_beat_map_nodes_sorter") #TODO: dont sort
+		_set_max_y(int(sorted_keys[len(sorted_keys) - 1].split(" ")[1]))
+		for key in sorted_keys:
+			var xy = key.split(" ")
+			var x = int(xy[0])
+			var y = int(xy[1])
+			_set_tile(x, y, _scene.beat_map[key], false, y)
 	update()
 
 func _beat_map_nodes_sorter(stra, strb):
@@ -323,6 +321,13 @@ func _process(delta):
 
 onready var _keyboard_selection_box_color = _keyboard_selection_box.color
 
+func _should_tick_at_y(y):
+	for x in _scene.number_of_lanes:
+		var tile: Dictionary = _get_tile(x, y)
+		if not tile.empty():
+			return true
+	return false
+
 func notes_step(delta):
 	song_time += delta
 	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
@@ -333,9 +338,11 @@ func notes_step(delta):
 	if _current_keyboard_position.y != new_y:
 		_current_keyboard_position.y = new_y
 		_update_keyboard_selection_box()
-		_keyboard_selection_box.color = Color.lightgreen
-		yield(get_tree().create_timer(0.05), "timeout")
-		_keyboard_selection_box.color = _keyboard_selection_box_color
+		if _should_tick_at_y(new_y):
+			$Tick.play()
+#		_keyboard_selection_box.color = Color.lightgreen
+#		yield(get_tree().create_timer(0.05), "timeout")
+#		_keyboard_selection_box.color = _keyboard_selection_box_color
 
 
 func _better_range(from: int, to: int, max_range: int):
@@ -347,15 +354,15 @@ func _better_range(from: int, to: int, max_range: int):
 	return range(from, to+dir, dir)
 
 func _draw():
-	var scroll_y = -int(_scrolling.rect_position.y / _tile_size.y)
+	var scroll_y = -int(_scrolling.rect_position.y / _scene.tile_size.y)
 	var sorted_keys
 	var max_y
 	if _collapse_spaces:
 		sorted_keys = _scene.beat_map.keys()
 		sorted_keys.sort()
 		max_y = sorted_keys[len(sorted_keys)-1] if not sorted_keys.empty() else 0
-	for i in range(0, ceil(rect_size.y / _tile_size.y) + 1):
-		var y = i * _tile_size.y + fmod(_scrolling.rect_position.y, _tile_size.y)
+	for i in range(0, ceil(rect_size.y / _scene.tile_size.y) + 1):
+		var y = i * _scene.tile_size.y + fmod(_scrolling.rect_position.y, _scene.tile_size.y)
 		var current_y_int 
 		
 		if _collapse_spaces:
@@ -368,7 +375,7 @@ func _draw():
 		
 		draw_string(
 			get_font(""), 
-			Vector2(0, y + _tile_size.y/4), 
+			Vector2(0, y + _scene.tile_size.y/4), 
 			str(current_y_int)
 		)
 		draw_line(
