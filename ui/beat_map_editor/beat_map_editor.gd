@@ -61,12 +61,18 @@ func _on_window_resized():
 func _input(event):
 	if event is InputEventKey:
 		if event.pressed and event.control:
+			var button_clicked = true
 			if event.scancode == KEY_Z && event.shift:
 				undo_redo.redo()
 			elif event.scancode == KEY_Z:
 				undo_redo.undo()
 			elif event.scancode == KEY_S:
 				_on_SaveBeatmap_pressed()
+			else:
+				button_clicked = false
+			
+			if button_clicked:
+				get_tree().set_input_as_handled()
 		
 
 func _on_tiles_modified():
