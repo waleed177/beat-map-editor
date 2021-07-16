@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/click_004.ogg-9e3223e4348bc74290cc6299e98f6d82.oggstr"
+
+[deps]
+
+source_file="res://addons/beat_map_editor/click_004.ogg"
+dest_files=[ "res://.import/click_004.ogg-9e3223e4348bc74290cc6299e98f6d82.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

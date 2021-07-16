@@ -17,11 +17,11 @@ var _confirmation_dialog_confirmed = false
 export(NodePath) var note_editor_path
 onready var note_editor = get_node(note_editor_path)
 export(NodePath) var BMP_txt_path
-onready var BMP_txt: TextEdit = get_node(BMP_txt_path)
+onready var BMP_txt: LineEdit = get_node(BMP_txt_path)
 export(NodePath) var speed_multiplier_txt_path
-onready var speed_multiplier_txt: TextEdit = get_node(speed_multiplier_txt_path)
+onready var speed_multiplier_txt: LineEdit = get_node(speed_multiplier_txt_path)
 export(NodePath) var song_index_txt_path
-onready var song_index_txt: TextEdit = get_node(song_index_txt_path)
+onready var song_index_txt: LineEdit = get_node(song_index_txt_path)
 
 export(NodePath) var open_file_label_path
 onready var open_file_label: Label = get_node(open_file_label_path)
@@ -37,6 +37,8 @@ var song_file_path
 var songs
 var songs_directory
 
+var number_of_lanes = 4
+
 func _ready():
 	EDITOR_SETTINGS_PATH = filename.get_base_dir() + "/../../editor_settings.json"
 	load_editor_settings(EDITOR_SETTINGS_PATH)
@@ -45,7 +47,14 @@ func _ready():
 	note_editor.connect("tiles_modified", self, "_on_tiles_modified")
 	plugin.connect("resource_saved", self, "_on_resource_saved")
 	confirmation_dialog.connect("confirmed", self, "_on_confirmation_dialog_confirmed")
+	
+	get_tree().get_root().connect("size_changed", self, "_on_window_resized")
+	_on_window_resized()
 
+func _on_window_resized():
+	var size = note_editor.rect_size.y/10
+	tile_size = Vector2(size, size)
+	note_editor.refresh()
 
 func _on_resource_saved(resource):
 	if visible:
@@ -86,7 +95,7 @@ func load_editor_settings(file_path):
 	keyboard_note_shortcuts = {}
 	keyboard_note_shortcuts_inv = {}
 	for key in dict_keyboard_note_shortcuts:
-		keyboard_note_shortcuts_inv[dict_keyboard_note_shortcuts[key]] = int(key)
+		keyboard_note_shortcuts_inv[dict_keyboard_note_shortcuts[key].tile_name] = int(key)
 		keyboard_note_shortcuts[int(key)] = dict_keyboard_note_shortcuts[key]
 	song_file_path = dict["song_file_path"]
 	songs_directory = dict["songs_directory"]
@@ -117,17 +126,29 @@ func save_beat_map():
 		int(song_index_txt.text),
 	]
 	var beat_map_keys = beat_map.keys()
-	beat_map_keys.sort()
-	var max_index = beat_map_keys[len(beat_map_keys)-1]
+	beat_map_keys.sort_custom(self, "_beat_map_keys_sorter")
+	var max_index = int(beat_map_keys[len(beat_map_keys)-1].split(" ")[1])
+	
+	for i in number_of_lanes:
+		array_beat_map.append([])
 	
 	for key in beat_map_keys:
-		array_beat_map.append([get_note_type(key, true), key, int(beat_map[key].name)])
+		var sp = key.split(" ")
+		var x = int(sp[0])
+		var y = int(sp[1])
+		var arr = array_beat_map[x+3]
+		arr.append([get_note_type(y, true), y, int(beat_map[key].name)])
+	
 	file.store_string(JSON.print(array_beat_map))
 	file.close()
 	modified = false
 	refresh_open_file_label()
 	print("Saved beatmap at " + currently_open_file)
 
+func _beat_map_keys_sorter(key_a:String, key_b: String):
+	var y1 = int(key_a.split(" ")[1])
+	var y2 = int(key_b.split(" ")[1])
+	return y1 < y2 
 
 func _on_SaveBeatmap_pressed():
 	if currently_open_file.empty():
@@ -163,14 +184,13 @@ func show_save_beatmap_dialog():
 
 func _on_ClearBeatmap_pressed():
 	var undo_redo: UndoRedo = plugin.undo_redo
-	var beat_map_clone = beat_map.duplicate()
 	undo_redo.create_action("Clear Beatmap")
 	undo_redo.add_do_method(self, "_clear_beatmap")
-	undo_redo.add_undo_property(self, "beat_map", beat_map_clone)
+	undo_redo.add_undo_property(self, "beat_map",  beat_map.duplicate())
 	undo_redo.add_do_method(note_editor, "refresh")
 	undo_redo.add_undo_method(note_editor, "refresh")
-	undo_redo.add_do_property(note_editor, "_current_y", 0)
-	undo_redo.add_undo_property(note_editor, "_current_y", note_editor._current_y)
+	undo_redo.add_do_property(note_editor, "_current_keyboard_position", Vector2(0, 0))
+	undo_redo.add_undo_property(note_editor, "_current_keyboard_position", note_editor._current_keyboard_position)
 	undo_redo.add_do_method(note_editor, "_update_keyboard_selection_box")
 	undo_redo.add_undo_method(note_editor, "_update_keyboard_selection_box")
 	undo_redo.commit_action()
@@ -186,7 +206,7 @@ func _on_NewBeatmap_pressed():
 		clear = _confirmation_dialog_confirmed
 	if clear:
 		beat_map.clear()
-		note_editor._current_y = 0
+		note_editor._current_keyboard_position = Vector2(0, 0)
 		note_editor._update_keyboard_selection_box()
 		note_editor.refresh()
 		currently_open_file = ""
@@ -227,8 +247,8 @@ func _on_PlaySongFromHere_pressed():
 		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
-		player.seek(note_editor.get_current_time())
-		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), note_editor.get_current_time())
+		player.seek(note_editor._get_time_from_y())
+		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), true)
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
 
@@ -261,17 +281,19 @@ func _on_file_selected(path):
 			speed_multiplier_txt.text = str(beat_map_array[1])
 			song_index_txt.text = str(beat_map_array[2])
 			beat_map.clear()
-			for i in range(3, len(beat_map_array)):
-				var arr = beat_map_array[i]
-				var y = arr[1]
-				var name = arr[2]
-				beat_map[y] = {
-					name=name
-				}
+			for x in beat_map_array.size()-3:
+				var beat_map_1d = beat_map_array[x+3]
+				for i in range(0, len(beat_map_1d)):
+					var arr = beat_map_1d[i]
+					var y = arr[1]
+					var name = arr[2]
+					beat_map[str(x) + " " + str(y)] = {
+						name=name
+					}
 			note_editor.refresh()
 			currently_open_file = path
 			refresh_open_file_label()
-			note_editor._current_y = 0
+			note_editor._current_keyboard_position =  Vector2(0, 0)
 			note_editor._update_keyboard_selection_box()
 			note_editor.refresh()
 
