@@ -37,12 +37,15 @@ func refresh():
 			button.get_node("Shortcut").text = ""
 		_notes_container.add_child(button)
 
-func _on_note_button_gui_input(event, tile_name, button):
+func _on_note_button_gui_input(event, tile_name, button: TextureButton):
 	if event is InputEventMouseButton:
 		if event.pressed:
 			match event.button_index:
 				BUTTON_LEFT:
 					selected_note = tile_name
+					for child in _notes_container.get_children():
+						child.select(false)
+					button.select(true)
 					emit_signal("note_selection_changed", selected_note)
 				BUTTON_RIGHT:
 					if _mode == "normal":

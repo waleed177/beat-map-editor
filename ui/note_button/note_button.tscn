@@ -1,9 +1,11 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ui/note_button/note_button.gd" type="Script" id=1]
 
 [node name="NoteButton" type="TextureButton"]
-margin_top = 288.0
 margin_right = 64.0
-margin_bottom = 352.0
+margin_bottom = 64.0
+script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -15,6 +17,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = -25.0
 margin_top = -14.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 1, 1, 1, 0.145098 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
