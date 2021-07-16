@@ -2,12 +2,12 @@
 
 importer="ogg_vorbis"
 type="AudioStreamOGGVorbis"
-path="res://.import/click_004.ogg-96805a45c77659fe2ea51382c3b41f86.oggstr"
+path="res://.import/click_004.ogg-d821a3eef4e6cae448b0485997210d0b.oggstr"
 
 [deps]
 
-source_file="res://addons/beat_map_editor/ui/beat_map_editor/click_004.ogg"
-dest_files=[ "res://.import/click_004.ogg-96805a45c77659fe2ea51382c3b41f86.oggstr" ]
+source_file="res://ui/beat_map_editor/click_004.ogg"
+dest_files=[ "res://.import/click_004.ogg-d821a3eef4e6cae448b0485997210d0b.oggstr" ]
 
 [params]
 

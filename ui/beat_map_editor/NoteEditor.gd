@@ -120,7 +120,7 @@ func _gui_input(event):
 							_selection_stabilize_selection = false
 							_selection_first_position = Vector2(tile_x, tile_y)
 						"paste":
-							var undo_redo: UndoRedo = _scene.plugin.undo_redo
+							var undo_redo: UndoRedo = _scene.undo_redo
 							undo_redo.create_action("Paste")
 							var min_x = min(_clipboard["from"].x, _clipboard["to"].x)
 							var min_y = min(_clipboard["from"].y, _clipboard["to"].y)
@@ -135,7 +135,7 @@ func _gui_input(event):
 							"place", "none":
 								_undoable_set_tile(tile_x, tile_y, {})
 							"paste":
-								var undo_redo: UndoRedo = _scene.plugin.undo_redo
+								var undo_redo: UndoRedo = _scene.undo_redo
 								undo_redo.create_action("Clear")
 								var min_x = min(_clipboard["from"].x, _clipboard["to"].x)
 								var min_y = min(_clipboard["from"].y, _clipboard["to"].y)
@@ -144,7 +144,7 @@ func _gui_input(event):
 										_undoable_set_tile(tile_x+i-min_x, tile_y+j-min_y, {}, false)
 								undo_redo.commit_action()
 							"select":
-								var undo_redo: UndoRedo = _scene.plugin.undo_redo
+								var undo_redo: UndoRedo = _scene.undo_redo
 								undo_redo.create_action("Clear")
 
 								for i in _better_range(_selection_first_position.x, _selection_second_position.x, _scene.number_of_lanes):
@@ -226,7 +226,7 @@ func _get_tile(x: int, y: int):
 	return _scene.beat_map[str(x) + " " + str(y)] if (str(x) + " " + str(y)) in _scene.beat_map else {}
 
 func _undoable_set_tile(x: int, y: int, data, commit_action = true):
-	var undo_redo: UndoRedo = _scene.plugin.undo_redo
+	var undo_redo: UndoRedo = _scene.undo_redo
 	if commit_action:
 		undo_redo.create_action("Set Tile")
 	undo_redo.add_do_method(self, "_set_tile", x, y, data)

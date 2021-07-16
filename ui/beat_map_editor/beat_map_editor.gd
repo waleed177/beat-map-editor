@@ -39,26 +39,35 @@ var songs_directory
 
 var number_of_lanes = 4
 
+var undo_redo: UndoRedo = UndoRedo.new()
+
 func _ready():
 	EDITOR_SETTINGS_PATH = filename.get_base_dir() + "/../../editor_settings.json"
 	load_editor_settings(EDITOR_SETTINGS_PATH)
 	file_dialog.connect("file_selected", self, "_on_file_selected")
 	file_dialog_select_songs.connect("file_selected", self, "_on_songs_file_selected")
 	note_editor.connect("tiles_modified", self, "_on_tiles_modified")
-	plugin.connect("resource_saved", self, "_on_resource_saved")
 	confirmation_dialog.connect("confirmed", self, "_on_confirmation_dialog_confirmed")
 	
 	get_tree().get_root().connect("size_changed", self, "_on_window_resized")
 	_on_window_resized()
+
 
 func _on_window_resized():
 	var size = note_editor.rect_size.y/10
 	tile_size = Vector2(size, size)
 	note_editor.refresh()
 
-func _on_resource_saved(resource):
-	if visible:
-		_on_SaveBeatmap_pressed()
+func _input(event):
+	if event is InputEventKey:
+		if event.pressed and event.control:
+			if event.scancode == KEY_Z && event.shift:
+				undo_redo.redo()
+			elif event.scancode == KEY_Z:
+				undo_redo.undo()
+			elif event.scancode == KEY_S:
+				_on_SaveBeatmap_pressed()
+		
 
 func _on_tiles_modified():
 	modified = true
@@ -183,7 +192,7 @@ func show_save_beatmap_dialog():
 
 
 func _on_ClearBeatmap_pressed():
-	var undo_redo: UndoRedo = plugin.undo_redo
+	var undo_redo: UndoRedo = undo_redo
 	undo_redo.create_action("Clear Beatmap")
 	undo_redo.add_do_method(self, "_clear_beatmap")
 	undo_redo.add_undo_property(self, "beat_map",  beat_map.duplicate())
@@ -229,7 +238,7 @@ func _on_PlaySongFromStart_pressed():
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
 	else:
-		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
+		player.stream = GDScriptAudioImporter.loadfile(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
 		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text))
@@ -244,7 +253,7 @@ func _on_PlaySongFromHere_pressed():
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
 		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
 	else:
-		player.stream = load(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
+		player.stream = GDScriptAudioImporter.loadfile(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		player.play()
 		player.seek(note_editor._get_time_from_y())

@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"keyboard_note_shortcuts":{"68":{"tile_name":"03","x":3},"65":{"tile_name":"02","x":0},"83":{"tile_name":"01","x":2},"87":{"tile_name":"00","x":1}},"song_file_path":"/home/waldo/Documents/songs/a.json","songs_directory":"/home/waldo/Documents/songs"}
-=======
-{"keyboard_note_shortcuts":{"75":{"tile_name":"01","x":1},"76":{"tile_name":"03","x":3},"73":{"tile_name":"00","x":2},"74":{"tile_name":"02","x":0}},"song_file_path":"D:/DEV/Github/rhythm-mmo-client/bunnythm/songs/songs.json","songs_directory":"D:/DEV/Github/rhythm-mmo-client/bunnythm/songs"}
->>>>>>> b14dd8fabf10918b84cee22ea3d4d3e662dc24ed
+{"keyboard_note_shortcuts":{"68":{"tile_name":"03","x":3},"65":{"tile_name":"02","x":0},"83":{"tile_name":"01","x":2},"87":{"tile_name":"00","x":1}},"song_file_path":"/home/waldo/Documents/GodotProjects/bunnythm/bunnythm/songs/songs.json","songs_directory":"/home/waldo/Documents/GodotProjects/bunnythm/bunnythm/songs"}

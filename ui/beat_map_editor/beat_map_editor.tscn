@@ -1,10 +1,10 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/NoteSelector.gd" type="Script" id=1]
-[ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/NoteEditor.gd" type="Script" id=2]
-[ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/beat_map_editor.gd" type="Script" id=3]
-[ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/ViewportContainer.gd" type="Script" id=4]
-[ext_resource path="res://addons/beat_map_editor/ui/beat_map_editor/tone.wav" type="AudioStream" id=5]
+[ext_resource path="res://ui/beat_map_editor/NoteSelector.gd" type="Script" id=1]
+[ext_resource path="res://ui/beat_map_editor/NoteEditor.gd" type="Script" id=2]
+[ext_resource path="res://ui/beat_map_editor/beat_map_editor.gd" type="Script" id=3]
+[ext_resource path="res://ui/beat_map_editor/ViewportContainer.gd" type="Script" id=4]
+[ext_resource path="res://ui/beat_map_editor/tone.wav" type="AudioStream" id=5]
 
 [sub_resource type="StyleBoxFlat" id=1]
 resource_local_to_scene = true
@@ -35,6 +35,9 @@ open_file_label_path = NodePath("VBoxContainer/Panel/OpenFile")
 margin_right = 1024.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 150, 52.5 )
+access = 2
+current_dir = "/home/waldo/Documents/GodotProjects/beatmapeditor"
+current_path = "/home/waldo/Documents/GodotProjects/beatmapeditor/"
 
 [node name="SelectSongsFile" type="FileDialog" parent="."]
 margin_right = 1024.0

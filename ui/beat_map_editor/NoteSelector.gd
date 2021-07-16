@@ -5,7 +5,7 @@ onready var _notes_container = $VBoxContainer/ScrollContainer/NotesContainer
 onready var _scene = get_owner()
 
 signal note_selection_changed
-const NoteButton = preload("res://addons/beat_map_editor/ui/note_button/note_button.tscn")
+const NoteButton = preload("res://ui/note_button/note_button.tscn")
 var selected_note = 0
 
 var _mode = "normal"
