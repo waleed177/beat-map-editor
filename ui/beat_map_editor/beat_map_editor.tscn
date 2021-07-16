@@ -249,6 +249,7 @@ margin_top = 42.0
 margin_right = 144.0
 margin_bottom = 66.0
 rect_min_size = Vector2( 0, 20 )
+text = "120"
 
 [node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 70.0
@@ -261,6 +262,7 @@ margin_top = 88.0
 margin_right = 144.0
 margin_bottom = 112.0
 rect_min_size = Vector2( 0, 20 )
+text = "1"
 
 [node name="Label5" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 116.0
@@ -273,6 +275,7 @@ margin_top = 134.0
 margin_right = 144.0
 margin_bottom = 158.0
 rect_min_size = Vector2( 0, 20 )
+text = "1"
 
 [node name="SaveBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 162.0
