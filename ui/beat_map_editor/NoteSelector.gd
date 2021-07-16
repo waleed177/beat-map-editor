@@ -16,6 +16,7 @@ func _ready():
 
 func refresh():
 	var tile_ids = _scene.tileset.get_tiles_ids()
+	print(_scene.keyboard_note_shortcuts_inv)
 	for note in _notes_container.get_children():
 		note.queue_free()
 	for tile_id in tile_ids:
@@ -30,7 +31,8 @@ func refresh():
 		button.expand = true
 		button.connect("gui_input", self, "_on_note_button_gui_input", [tile_name, button])
 		if tile_name in _scene.keyboard_note_shortcuts_inv:
-			button.get_node("Shortcut").text = OS.get_scancode_string(_scene.keyboard_note_shortcuts_inv[tile_name])
+			var scancode = _scene.keyboard_note_shortcuts_inv[tile_name]
+			button.get_node("Shortcut").text = OS.get_scancode_string(scancode) + str(_scene.keyboard_note_shortcuts[scancode].x)
 		else:
 			button.get_node("Shortcut").text = ""
 		_notes_container.add_child(button)
@@ -59,10 +61,20 @@ func _on_note_button_gui_input(event, tile_name, button):
 func _input(event):
 	if event is InputEventKey:
 		if event.pressed and _mode == "select_shortcut":
-			_selection.button.get_node("Shortcut").text = OS.get_scancode_string(event.scancode)
-			if _selection.tile_name in _scene.keyboard_note_shortcuts_inv:
-				_scene.keyboard_note_shortcuts.erase(_scene.keyboard_note_shortcuts_inv[_selection.tile_name])
-			_scene.keyboard_note_shortcuts[event.scancode] = _selection.tile_name
-			_scene.keyboard_note_shortcuts_inv[_selection.tile_name] = event.scancode
-			_mode = "normal"
+			if KEY_0 <= event.scancode and event.scancode <= KEY_9:
+				_selection.button.get_node("Shortcut").text = OS.get_scancode_string(_scene.keyboard_note_shortcuts_inv[_selection.tile_name]) + str(event.scancode - KEY_0)
+				
+				var scancode = int(_scene.keyboard_note_shortcuts_inv[_selection.tile_name])
+				_scene.keyboard_note_shortcuts[scancode].x = event.scancode - KEY_0
+				_mode = "normal"
+			else:
+				_selection.button.get_node("Shortcut").text = OS.get_scancode_string(event.scancode)
+				if _selection.tile_name in _scene.keyboard_note_shortcuts_inv:
+					_scene.keyboard_note_shortcuts.erase(_scene.keyboard_note_shortcuts_inv[_selection.tile_name])
+				_scene.keyboard_note_shortcuts[event.scancode] = {
+					tile_name= _selection.tile_name,
+					x = -1
+				} 
+				_scene.keyboard_note_shortcuts_inv[_selection.tile_name] = event.scancode
+				_mode = "normal"
 			return true

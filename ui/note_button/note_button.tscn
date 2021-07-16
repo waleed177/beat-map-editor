@@ -4,13 +4,16 @@
 margin_top = 288.0
 margin_right = 64.0
 margin_bottom = 352.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Shortcut" type="Label" parent="."]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -14.0
+margin_left = -25.0
 margin_top = -14.0
 __meta__ = {
 "_edit_use_anchors_": false
