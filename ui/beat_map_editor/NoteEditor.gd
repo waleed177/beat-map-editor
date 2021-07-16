@@ -310,7 +310,7 @@ func play_notes(bpm, speed, from_current_keyboard_position = false):
 	song_playing = true
 
 func _get_time_from_y():
-	return _current_keyboard_position.y/(song_bpm*(8.0/120.0))
+	return _current_keyboard_position.y/(song_bpm*(16.0/120.0))
 
 func stop_playing():
 	song_playing = false
@@ -330,7 +330,7 @@ func _should_tick_at_y(y):
 
 func notes_step(delta):
 	song_time += delta
-	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*8.0)
+	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*16.0)
 	_set_scroll_y(song_scroll_y)
 	_keyboard_selection_box.rect_position = Vector2(0, song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
