@@ -162,8 +162,8 @@ __meta__ = {
 [node name="Scrolling" type="Control" parent="VBoxContainer/HBoxContainer/NoteEditor"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -128.0
-margin_right = -128.0
+margin_left = -115.2
+margin_right = -115.2
 mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -172,8 +172,8 @@ __meta__ = {
 [node name="SelectionBox" type="ColorRect" parent="VBoxContainer/HBoxContainer/NoteEditor/Scrolling"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_left = -32.0
-margin_right = 32.0
+margin_left = -30.7071
+margin_right = 33.2929
 margin_bottom = 64.0
 mouse_filter = 1
 color = Color( 1, 1, 1, 0.25098 )
@@ -184,8 +184,8 @@ __meta__ = {
 [node name="KeyboardSelectionBox" type="ColorRect" parent="VBoxContainer/HBoxContainer/NoteEditor/Scrolling"]
 anchor_left = 0.5
 anchor_right = 0.5
-margin_right = 64.0
-margin_bottom = 64.0
+margin_right = 57.6
+margin_bottom = 57.6
 mouse_filter = 1
 color = Color( 0.0784314, 1, 0, 0.25098 )
 __meta__ = {

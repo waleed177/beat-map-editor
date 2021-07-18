@@ -198,7 +198,6 @@ func show_save_beatmap_dialog():
 
 
 func _on_ClearBeatmap_pressed():
-	var undo_redo: UndoRedo = undo_redo
 	undo_redo.create_action("Clear Beatmap")
 	undo_redo.add_do_method(self, "_clear_beatmap")
 	undo_redo.add_undo_property(self, "beat_map",  beat_map.duplicate())
