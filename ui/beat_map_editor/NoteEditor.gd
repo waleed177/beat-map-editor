@@ -6,6 +6,7 @@ onready var _scene = get_owner()
 onready var _selection_box = $Scrolling/SelectionBox
 onready var _keyboard_selection_box = $Scrolling/KeyboardSelectionBox
 onready var _scrolling = $Scrolling
+onready var _song_player = get_node("../../../AudioStreamPlayer") as AudioStreamPlayer
 
 signal tiles_modified
 
@@ -329,8 +330,11 @@ func _should_tick_at_y(y):
 	return false
 
 func notes_step(delta):
-	song_time += delta
-	song_scroll_y = song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*16.0)
+#	song_time += delta
+	song_time = _song_player.get_playback_position()
+	#notes_step_value = time_offset+0-((note_size)*(speed)*bpm)/60.0 * time * 4
+	# song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*16.0)
+	song_scroll_y = (float(_scene.tile_size.y)*(song_speed)*song_bpm)/60.0 * song_time * 4
 	_set_scroll_y(song_scroll_y)
 	_keyboard_selection_box.rect_position = Vector2(0, song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
