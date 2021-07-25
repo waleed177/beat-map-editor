@@ -307,11 +307,11 @@ var song_scroll_y = 0
 func play_notes(bpm, speed, from_current_keyboard_position = false):
 	song_bpm = float(bpm)
 	song_speed = speed
-	song_time = _get_time_from_y() if from_current_keyboard_position else 0
+	_song_player.seek(_get_time_from_y() if from_current_keyboard_position else 0)
 	song_playing = true
 
 func _get_time_from_y():
-	return _current_keyboard_position.y/(song_bpm*(16.0/120.0))
+	return _current_keyboard_position.y/( (song_speed*song_bpm)/60.0 * 4)
 
 func stop_playing():
 	song_playing = false
