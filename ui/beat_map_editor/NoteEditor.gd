@@ -303,15 +303,24 @@ var song_speed
 var song_playing = false
 var song_time = 0
 var song_scroll_y = 0
+var song_time_offset = 0
 
-func play_notes(bpm, speed, from_current_keyboard_position = false):
+func play_notes(bpm, speed, time_offset, from_current_keyboard_position = false):
 	song_bpm = float(bpm)
 	song_speed = speed
-	_song_player.seek(_get_time_from_y() if from_current_keyboard_position else 0)
 	song_playing = true
+	song_time_offset = time_offset
+	if from_current_keyboard_position:
+		var time = _get_time_from_y(_keyboard_selection_box.rect_position.y)
+		_song_player.play(time)
+	else:
+		_song_player.play()
 
-func _get_time_from_y():
-	return _current_keyboard_position.y/( (song_speed*song_bpm)/60.0 * 4)
+func _get_time_from_y(y):
+	return y/( float(_scene.tile_size.y) * (song_speed*song_bpm)/60.0 * 4) - song_time_offset
+
+func _get_y_from_time(time):
+	return  (float(_scene.tile_size.y)*(song_speed)*song_bpm)/60.0 * time * 4
 
 func stop_playing():
 	song_playing = false
@@ -331,10 +340,13 @@ func _should_tick_at_y(y):
 
 func notes_step(delta):
 #	song_time += delta
-	song_time = _song_player.get_playback_position()
+	song_time = song_time_offset + _song_player.get_playback_position() + AudioServer.get_time_since_last_mix()
+	song_time -= AudioServer.get_output_latency()
+	if song_time <= 0: song_time = 0
+	
 	#notes_step_value = time_offset+0-((note_size)*(speed)*bpm)/60.0 * time * 4
 	# song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*16.0)
-	song_scroll_y = (float(_scene.tile_size.y)*(song_speed)*song_bpm)/60.0 * song_time * 4
+	song_scroll_y = _get_y_from_time(song_time)
 	_set_scroll_y(song_scroll_y)
 	_keyboard_selection_box.rect_position = Vector2(0, song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
