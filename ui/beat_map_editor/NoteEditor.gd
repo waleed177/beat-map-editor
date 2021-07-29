@@ -304,6 +304,7 @@ var song_playing = false
 var song_time = 0
 var song_scroll_y = 0
 var song_time_offset = 0
+var song_last_scroll_y = 0
 
 func play_notes(bpm, speed, time_offset, from_current_keyboard_position = false):
 	song_bpm = float(bpm)
@@ -312,8 +313,10 @@ func play_notes(bpm, speed, time_offset, from_current_keyboard_position = false)
 	song_time_offset = time_offset
 	if from_current_keyboard_position:
 		var time = _get_time_from_y(_keyboard_selection_box.rect_position.y)
+		song_last_scroll_y = time
 		_song_player.play(time)
 	else:
+		song_last_scroll_y = 0
 		_song_player.play()
 
 func _get_time_from_y(y):
@@ -346,7 +349,8 @@ func notes_step(delta):
 	
 	#notes_step_value = time_offset+0-((note_size)*(speed)*bpm)/60.0 * time * 4
 	# song_bpm*song_time*((float(_scene.tile_size.y)/120.0)*16.0)
-	song_scroll_y = _get_y_from_time(song_time)
+	song_scroll_y = max(song_last_scroll_y, _get_y_from_time(song_time))
+	song_last_scroll_y = song_scroll_y
 	_set_scroll_y(song_scroll_y)
 	_keyboard_selection_box.rect_position = Vector2(0, song_scroll_y)
 	var new_y = floor(song_scroll_y/_scene.tile_size.y)
