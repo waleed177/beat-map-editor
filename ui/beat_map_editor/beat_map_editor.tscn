@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://ui/beat_map_editor/NoteSelector.gd" type="Script" id=1]
 [ext_resource path="res://ui/beat_map_editor/NoteEditor.gd" type="Script" id=2]
@@ -14,6 +14,12 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.133333, 0.133333, 0.133333, 1 )
+
+[sub_resource type="Theme" id=3]
+PanelContainer/styles/panel = SubResource( 2 )
 
 [node name="MarginContainer" type="MarginContainer"]
 anchor_right = 1.0
@@ -31,10 +37,12 @@ speed_multiplier_txt_path = NodePath("VBoxContainer/HBoxContainer/Actions/VBoxCo
 song_index_txt_path = NodePath("VBoxContainer/HBoxContainer/Actions/VBoxContainer/SongIndex")
 time_offset_txt_path = NodePath("VBoxContainer/HBoxContainer/Actions/VBoxContainer/TimeOffset")
 open_file_label_path = NodePath("VBoxContainer/Panel/OpenFile")
+player_song_from_start_button_path = NodePath("VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/PlaySongFromStart")
+player_song_from_here_button_path = NodePath("VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/PlaySongFromHere")
 
 [node name="FileDialog" type="FileDialog" parent="."]
 margin_right = 1024.0
-margin_bottom = 600.0
+margin_bottom = 674.0
 rect_min_size = Vector2( 150, 52.5 )
 access = 2
 current_dir = "/home/waldo/Documents/GodotProjects/beatmapeditor"
@@ -42,7 +50,7 @@ current_path = "/home/waldo/Documents/GodotProjects/beatmapeditor/"
 
 [node name="SelectSongsFile" type="FileDialog" parent="."]
 margin_right = 1024.0
-margin_bottom = 600.0
+margin_bottom = 674.0
 rect_min_size = Vector2( 150, 52.5 )
 window_title = "Select songs folder beatmap"
 access = 2
@@ -52,17 +60,47 @@ current_path = "/home/waldo/Documents/GodotProjects/MakingTools/"
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
 margin_right = 1024.0
-margin_bottom = 600.0
+margin_bottom = 674.0
 rect_min_size = Vector2( 150, 52.5 )
 window_title = "You did not save your changes."
 dialog_text = "Are you sure you want to open another beatmap?"
+dialog_hide_on_ok = false
+
+[node name="ExitDialog" type="ConfirmationDialog" parent="."]
+margin_left = 390.0
+margin_top = 271.0
+margin_right = 635.0
+margin_bottom = 329.0
+rect_min_size = Vector2( 150, 52.5 )
+window_title = "You did not save your changes."
+dialog_text = "Exit without saving?"
 dialog_hide_on_ok = false
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 margin_right = 1024.0
-margin_bottom = 600.0
+margin_bottom = 674.0
+
+[node name="Menus" type="Panel" parent="VBoxContainer"]
+visible = false
+margin_right = 1024.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 0, 24 )
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Menus"]
+margin_top = 4.0
+margin_right = 1024.0
+margin_bottom = 24.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MenuButton" type="MenuButton" parent="VBoxContainer/Menus/HBoxContainer2"]
+margin_right = 35.0
+margin_bottom = 20.0
+text = "File"
+items = [ "Save Beatmap", null, 0, false, false, 0, 0, null, "", false, "Save Beatmap As", null, 0, false, false, 1, 0, null, "", false, "Open Beatmap", null, 0, false, false, 2, 0, null, "", false ]
 
 [node name="Panel" type="Panel" parent="VBoxContainer"]
 margin_right = 1024.0
@@ -80,7 +118,7 @@ __meta__ = {
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 24.0
 margin_right = 1024.0
-margin_bottom = 600.0
+margin_bottom = 674.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 __meta__ = {
@@ -89,7 +127,7 @@ __meta__ = {
 
 [node name="NoteSelector" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
 margin_right = 160.0
-margin_bottom = 576.0
+margin_bottom = 650.0
 rect_min_size = Vector2( 160, 0 )
 size_flags_vertical = 3
 custom_constants/margin_right = 10
@@ -99,7 +137,7 @@ script = ExtResource( 1 )
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/NoteSelector"]
 margin_left = 10.0
 margin_right = 150.0
-margin_bottom = 576.0
+margin_bottom = 650.0
 
 [node name="NotesLbl" type="Label" parent="VBoxContainer/HBoxContainer/NoteSelector/VBoxContainer"]
 margin_right = 140.0
@@ -114,7 +152,7 @@ __meta__ = {
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/HBoxContainer/NoteSelector/VBoxContainer"]
 margin_top = 18.0
 margin_right = 140.0
-margin_bottom = 576.0
+margin_bottom = 650.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 __meta__ = {
@@ -124,7 +162,7 @@ __meta__ = {
 [node name="NotesContainer" type="GridContainer" parent="VBoxContainer/HBoxContainer/NoteSelector/VBoxContainer/ScrollContainer"]
 modulate = Color( 0.878431, 0.862745, 0.85098, 1 )
 margin_right = 140.0
-margin_bottom = 558.0
+margin_bottom = 632.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 2
@@ -134,8 +172,8 @@ __meta__ = {
 
 [node name="NoteEditor" type="Control" parent="VBoxContainer/HBoxContainer"]
 margin_left = 164.0
-margin_right = 856.0
-margin_bottom = 576.0
+margin_right = 862.0
+margin_bottom = 650.0
 rect_min_size = Vector2( 400, 0 )
 rect_clip_content = true
 focus_mode = 1
@@ -213,10 +251,11 @@ render_target_update_mode = 3
 script = ExtResource( 4 )
 
 [node name="Actions" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
-margin_left = 860.0
+margin_left = 866.0
 margin_right = 1024.0
-margin_bottom = 576.0
+margin_bottom = 650.0
 rect_min_size = Vector2( 150, 0 )
+theme = SubResource( 3 )
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
 custom_constants/margin_left = 10
@@ -225,14 +264,14 @@ custom_constants/margin_bottom = 10
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/Actions"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 154.0
-margin_bottom = 566.0
+margin_right = 148.0
+margin_bottom = 640.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="SaveSettings" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 20.0
 text = "Save Editor Settings"
 __meta__ = {
@@ -241,179 +280,283 @@ __meta__ = {
 
 [node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 24.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 38.0
 text = "BMP:"
 
 [node name="BMP" type="LineEdit" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 42.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 66.0
 rect_min_size = Vector2( 0, 20 )
 text = "120"
 
 [node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 70.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 84.0
 text = "Speed Multiplier:"
 
 [node name="SpeedMultiplier" type="LineEdit" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 88.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 112.0
 rect_min_size = Vector2( 0, 20 )
 text = "1"
 
 [node name="Label5" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 116.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 130.0
 text = "Song Index:"
 
 [node name="SongIndex" type="LineEdit" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 134.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 158.0
 rect_min_size = Vector2( 0, 20 )
 text = "1"
 
 [node name="Label6" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 162.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 176.0
 text = "Time Offset:"
 
 [node name="TimeOffset" type="LineEdit" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 180.0
-margin_right = 144.0
+margin_right = 138.0
 margin_bottom = 204.0
 rect_min_size = Vector2( 0, 20 )
 text = "0"
 
-[node name="SaveBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+[node name="Panel4" type="PanelContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
 margin_top = 208.0
-margin_right = 144.0
-margin_bottom = 228.0
-text = "Save Beatmap"
+margin_right = 138.0
+margin_bottom = 358.0
+
+[node name="Margin" type="MarginContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4"]
+margin_right = 138.0
+margin_bottom = 150.0
+custom_constants/margin_right = 8
+custom_constants/margin_top = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 8
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="SaveBeatmapAs" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 232.0
-margin_right = 144.0
-margin_bottom = 252.0
-text = "Save Beatmap As"
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 130.0
+margin_bottom = 142.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="OpenBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 256.0
-margin_right = 144.0
-margin_bottom = 276.0
-text = "Open Beatmap"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer"]
+margin_right = 122.0
+margin_bottom = 14.0
+text = "File"
 
-[node name="NewBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 280.0
-margin_right = 144.0
-margin_bottom = 300.0
-text = "New Beatmap"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ClearBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 304.0
-margin_right = 144.0
-margin_bottom = 324.0
+[node name="ClearBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer"]
+margin_top = 18.0
+margin_right = 122.0
+margin_bottom = 38.0
 text = "Clear Beatmap"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 328.0
-margin_right = 144.0
-margin_bottom = 328.0
-
-[node name="CollapseSpaces" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 332.0
-margin_right = 144.0
-margin_bottom = 352.0
-text = "Collapse Spaces"
-
-[node name="Panel2" type="Panel" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 356.0
-margin_right = 144.0
-margin_bottom = 356.0
-
-[node name="SelectSongsFolder" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 360.0
-margin_right = 144.0
-margin_bottom = 380.0
-text = "Select Songs File"
+[node name="NewBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer"]
+margin_top = 42.0
+margin_right = 122.0
+margin_bottom = 62.0
+text = "New Beatmap"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PlaySongFromStart" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 384.0
-margin_right = 144.0
-margin_bottom = 404.0
-text = "Play Song From Start"
+[node name="SaveBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer"]
+margin_top = 66.0
+margin_right = 122.0
+margin_bottom = 86.0
+text = "Save Beatmap"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[node name="PlaySongFromHere" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 408.0
-margin_right = 144.0
-margin_bottom = 428.0
-text = "Play Song From Here"
+[node name="SaveBeatmapAs" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer"]
+margin_top = 90.0
+margin_right = 122.0
+margin_bottom = 110.0
+text = "Save Beatmap As"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 432.0
-margin_right = 144.0
-margin_bottom = 432.0
+[node name="OpenBeatmap" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer"]
+margin_top = 114.0
+margin_right = 122.0
+margin_bottom = 134.0
+text = "Open Beatmap"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[node name="NoTool" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 436.0
-margin_right = 144.0
-margin_bottom = 456.0
+[node name="CollapseSpaces" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+visible = false
+margin_top = 352.0
+margin_right = 137.0
+margin_bottom = 372.0
+text = "Collapse Spaces"
+
+[node name="Panel5" type="PanelContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 362.0
+margin_right = 138.0
+margin_bottom = 500.0
+
+[node name="Margin" type="MarginContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5"]
+margin_right = 138.0
+margin_bottom = 138.0
+custom_constants/margin_right = 8
+custom_constants/margin_top = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 8
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 130.0
+margin_bottom = 130.0
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer"]
+margin_right = 122.0
+margin_bottom = 14.0
+text = "Songs"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SelectSongsFolder" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer"]
+margin_top = 18.0
+margin_right = 122.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 0, 32 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/SelectSongsFolder"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "Select Songs
+File"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlaySongFromStart" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer"]
+margin_top = 54.0
+margin_right = 122.0
+margin_bottom = 86.0
+rect_min_size = Vector2( 0, 32 )
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/PlaySongFromStart"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "Play Song 
+From Start"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlaySongFromHere" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer"]
+margin_top = 90.0
+margin_right = 122.0
+margin_bottom = 122.0
+rect_min_size = Vector2( 0, 32 )
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/PlaySongFromHere"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "Play Song
+From Here"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
+margin_top = 504.0
+margin_right = 138.0
+margin_bottom = 630.0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer"]
+margin_right = 138.0
+margin_bottom = 126.0
+custom_constants/margin_right = 8
+custom_constants/margin_top = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 130.0
+margin_bottom = 118.0
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+margin_right = 122.0
+margin_bottom = 14.0
+text = "Tools"
+
+[node name="NoTool" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 18.0
+margin_right = 122.0
+margin_bottom = 38.0
 text = "No Tool"
 
-[node name="SelectTool" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 460.0
-margin_right = 144.0
-margin_bottom = 480.0
+[node name="SelectTool" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 42.0
+margin_right = 122.0
+margin_bottom = 62.0
 text = "Select"
 
-[node name="CopyButton" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 484.0
-margin_right = 144.0
-margin_bottom = 504.0
+[node name="CopyButton" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 66.0
+margin_right = 122.0
+margin_bottom = 86.0
 text = "Copy"
 
-[node name="PasteButton" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer"]
-margin_top = 508.0
-margin_right = 144.0
-margin_bottom = 528.0
+[node name="PasteButton" type="Button" parent="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+margin_top = 90.0
+margin_right = 122.0
+margin_bottom = 110.0
 text = "Paste"
 
+[connection signal="confirmed" from="ExitDialog" to="." method="_on_ExitDialog_confirmed"]
 [connection signal="scrolling" from="VBoxContainer/HBoxContainer/NoteEditor/VScrollBar" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_VScrollBar_scrolling"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveSettings" to="." method="_on_SaveSettings_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveBeatmap" to="." method="_on_SaveBeatmap_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SaveBeatmapAs" to="." method="_on_SaveBeatmapAs_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/OpenBeatmap" to="." method="_on_OpenBeatmap_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/NewBeatmap" to="." method="_on_NewBeatmap_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/ClearBeatmap" to="." method="_on_ClearBeatmap_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer/ClearBeatmap" to="." method="_on_ClearBeatmap_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer/NewBeatmap" to="." method="_on_NewBeatmap_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer/SaveBeatmap" to="." method="_on_SaveBeatmap_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer/SaveBeatmapAs" to="." method="_on_SaveBeatmapAs_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel4/Margin/VBoxContainer/OpenBeatmap" to="." method="_on_OpenBeatmap_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/CollapseSpaces" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_CollapseSpaces_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SelectSongsFolder" to="." method="_on_SelectSongsFolder_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart" to="." method="_on_PlaySongFromStart_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere" to="." method="_on_PlaySongFromHere_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/NoTool" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_NoTool_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/SelectTool" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_SelectTool_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/CopyButton" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_CopyButton_pressed"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PasteButton" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_PasteButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/SelectSongsFolder" to="." method="_on_SelectSongsFolder_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/PlaySongFromStart" to="." method="_on_PlaySongFromStart_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/Panel5/Margin/VBoxContainer/PlaySongFromHere" to="." method="_on_PlaySongFromHere_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/NoTool" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_NoTool_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/SelectTool" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_SelectTool_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/CopyButton" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_CopyButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Actions/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/PasteButton" to="VBoxContainer/HBoxContainer/NoteEditor" method="_on_PasteButton_pressed"]

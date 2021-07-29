@@ -29,6 +29,12 @@ onready var time_offset_txt: LineEdit = get_node(time_offset_txt_path)
 export(NodePath) var open_file_label_path
 onready var open_file_label: Label = get_node(open_file_label_path)
 
+export(NodePath) var player_song_from_start_button_path
+onready var player_song_from_start_button: Button = get_node(player_song_from_start_button_path)
+
+export(NodePath) var player_song_from_here_button_path
+onready var player_song_from_here_button: Button = get_node(player_song_from_here_button_path)
+
 # 1 (4), 1/2 (8), 1/4 (16), 1/16 (64)
 var note_type_order = [0, 3, 2, 3, 1, 3, 2, 3] 
 var currently_open_file = ""
@@ -55,6 +61,15 @@ func _ready():
 	get_tree().get_root().connect("size_changed", self, "_on_window_resized")
 	_on_window_resized()
 
+	get_tree().set_auto_accept_quit(false)
+
+func _notification(request):
+	if (request == MainLoop.NOTIFICATION_WM_QUIT_REQUEST):
+		if modified:
+			$ExitDialog.popup_centered(Vector2(200, 50))
+		else:
+			get_tree().quit()
+		
 
 func _on_window_resized():
 	var size = note_editor.rect_size.y/10
@@ -243,28 +258,28 @@ func _on_PlaySongFromStart_pressed():
 	if player.playing:
 		player.stop()
 		note_editor.stop_playing()
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
+		player_song_from_start_button.get_node("Label").text = "Play Song\nFrom Start"
+		player_song_from_here_button.get_node("Label").text = "Play Song\nFrom Here"
 	else:
 		player.stream = GDScriptAudioImporter.loadfile(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), float(time_offset_txt.text))
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
+		player_song_from_start_button.get_node("Label").text = "Stop Playing"
+		player_song_from_here_button.get_node("Label").text = "Stop Playing"
 
 func _on_PlaySongFromHere_pressed():
 	var player = $AudioStreamPlayer
 	if player.playing:
 		player.stop()
 		note_editor.stop_playing()
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Play Song From Start"
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Play Song From Here"
+		player_song_from_start_button.get_node("Label").text = "Play Song\nFrom Start"
+		player_song_from_here_button.get_node("Label").text = "Play Song\nFrom Here"
 	else:
 		player.stream = GDScriptAudioImporter.loadfile(songs_directory + "/" + songs[int(song_index_txt.text)].get_file())
 		player.volume_db = -20
 		note_editor.play_notes(int(BMP_txt.text), float(speed_multiplier_txt.text), float(time_offset_txt.text), true)
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromStart".text = "Stop Playing"
-		$"VBoxContainer/HBoxContainer/Actions/VBoxContainer/PlaySongFromHere".text = "Stop Playing"
+		player_song_from_start_button.get_node("Label").text = "Stop Playing"
+		player_song_from_here_button.get_node("Label").text = "Stop Playing"
 
 func _on_SelectSongsFolder_pressed():
 	file_dialog_select_songs.mode=FileDialog.MODE_OPEN_FILE
@@ -311,3 +326,6 @@ func _on_file_selected(path):
 			note_editor._update_keyboard_selection_box()
 			note_editor.refresh()
 
+
+func _on_ExitDialog_confirmed():
+	get_tree().quit()
