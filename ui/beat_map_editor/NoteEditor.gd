@@ -281,7 +281,7 @@ func _beat_map_nodes_sorter(stra, strb):
 func _set_max_y(val):
 	_max_y = val
 	var height = $VScrollBar.rect_size.y/(_scene.tile_size.y*_max_y) if _max_y != 0 else 1
-	height = clamp(height, 0, 0.9)
+	height = clamp(height, 0.01, 0.9)
 	height *= $VScrollBar.rect_size.y
 	$VScrollBar.get_stylebox("grabber").border_width_top = height/2.0
 	$VScrollBar.get_stylebox("grabber").border_width_bottom = height/2.0
